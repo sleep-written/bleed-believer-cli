@@ -34,11 +34,14 @@ export function tsConfigToSwcOptions(tsConfigResult: TsConfigResult): Options {
             target: target?.toLowerCase() as any ?? 'es2022',
             parser: {
                 syntax: 'typescript',
-                decorators: experimentalDecorators,
+                decorators: true,
                 tsx: !!jsx
             },
             transform: {
-                decoratorMetadata: emitDecoratorMetadata
+                decoratorMetadata: emitDecoratorMetadata,
+                decoratorVersion: experimentalDecorators
+                ?   '2021-12'
+                :   '2022-03'
             },
             preserveAllComments: !removeComments,
             baseUrl: resolve(dirname(path), (baseUrl ?? '.')),
@@ -58,7 +61,6 @@ export function tsConfigToSwcOptions(tsConfigResult: TsConfigResult): Options {
             const type = module === 'nodenext'
                 ?   'nodenext'
                 :   'es6';
-
 
             options.isModule = true;
             options.module = {

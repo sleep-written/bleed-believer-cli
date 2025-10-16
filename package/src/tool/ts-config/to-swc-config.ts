@@ -36,12 +36,15 @@ export function toSWCConfig(tsConfigBase: TsConfig): SwcOptions {
     options.jsc = {
         target: target?.toLowerCase() as any ?? 'es2022',
         parser: {
+            decorators: true,
             syntax: 'typescript',
-            decorators: experimentalDecorators,
             tsx: !!jsx
         },
         transform: {
-            decoratorMetadata: emitDecoratorMetadata
+            decoratorMetadata: emitDecoratorMetadata,
+            decoratorVersion: experimentalDecorators
+            ?   '2021-12'
+            :   '2022-03'
         },
         preserveAllComments: !removeComments,
         baseUrl: resolve(dirname(path), (baseUrl ?? '.')),
