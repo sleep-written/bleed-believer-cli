@@ -1,0 +1,10 @@
+{
+    "type": "module",
+    "scripts": {
+        "build": "bb-path-alias build",
+        "start": "bb-path-alias start ./index.ts"
+    },
+    "dependencies": {
+        "@bleed-believer/path-alias": "file:../../package"
+    }
+}

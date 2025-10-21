@@ -1,0 +1,1 @@
+export type HexFunction = (color: string) => (value: string) => string;

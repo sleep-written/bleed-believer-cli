@@ -1,0 +1,1 @@
+export { fibonacci } from './fibonacci.js';

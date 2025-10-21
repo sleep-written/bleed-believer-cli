@@ -59,14 +59,11 @@ export class SwcTranspiler {
         if (include.length === 0) {
             include.push(normalize('./**/*.{ts,mts,cjs}'));
         }
-
-        const exclude = tsConfigResult.config.exclude ?? [];
-        exclude.unshift(normalize('./**/node_modules/*'));
-
         include.forEach((_, i) => {
             include[i] = normalize(include[i]);
         });
 
+        const exclude = tsConfigResult.config.exclude ?? [];
         exclude.forEach((_, i) => {
             exclude[i] = normalize(exclude[i]);
         });
@@ -74,7 +71,10 @@ export class SwcTranspiler {
         const sources = await this.#fastGlob(include, {
             dot: true,
             cwd: dirname(tsConfigResult.path),
-            ignore: exclude,
+            ignore: [
+                ...exclude,
+                './**/node_modules'
+            ],
             absolute: true,
             globstar: true,
             onlyFiles: true,
