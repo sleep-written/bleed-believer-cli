@@ -11,11 +11,11 @@
       "decorators": true
     },
     "transform": {
-      "decoratorMetadata": true
+      "decoratorVersion": "2022-03"
     },
     "baseUrl": "./src",
     "paths": {
-      "@tool/*": [ "./tool/*" ],
+      "@lib/*": [ "./lib/*" ],
       "@/*": [ "./*" ]
     }
   },

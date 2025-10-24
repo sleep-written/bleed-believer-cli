@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "es2024",
+        "module": "node20",
+        "moduleResolution": "node16",
+
+        "rootDir": "src",
+        "baseUrl": "src",
+
+        "paths": {
+            "@lib/*": [ "./lib/*" ]
+        }
+    }
+}

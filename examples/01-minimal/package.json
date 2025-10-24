@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@bleed-believer/path-alias": "file:../../package"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1"
+  }
+}
