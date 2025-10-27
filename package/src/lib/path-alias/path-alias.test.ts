@@ -1,5 +1,5 @@
-import type { TSConfig } from '@lib/ts-config/index.js';
 import type { PathAliasInject } from './interfaces/index.js';
+import type { TSConfig } from '@lib/ts-config/index.js';
 
 import { PathAlias } from './path-alias.js';
 import test from 'ava';

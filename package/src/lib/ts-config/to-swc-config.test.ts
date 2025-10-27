@@ -6,8 +6,6 @@ test('Minimal configuration', t => {
     t.deepEqual(swcConfig, {
         jsc: {
             target: 'esnext',
-            baseUrl: undefined,
-            paths: undefined,
             preserveAllComments: true,
             transform: {
                 decoratorMetadata: false,
@@ -19,7 +17,6 @@ test('Minimal configuration', t => {
             output: { charset: 'utf8' }
         },
         sourceMaps: false,
-        exclude: undefined,
         module: {
             type: 'es6',
             strict: false,

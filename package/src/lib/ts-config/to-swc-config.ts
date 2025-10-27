@@ -7,10 +7,6 @@ export function toSWCConfig(tsConfig: TSConfig): SWCConfig {
             target: tsConfig?.compilerOptions?.target !== 'es6'
                 ?   tsConfig?.compilerOptions?.target ?? 'esnext'
                 :   'es2015',
-            baseUrl: tsConfig?.compilerOptions?.baseUrl,
-            paths: tsConfig?.compilerOptions?.paths != null
-                ?   structuredClone(tsConfig?.compilerOptions?.paths)
-                :   undefined,
             preserveAllComments: !tsConfig?.compilerOptions?.removeComments,
             transform: {
                 decoratorMetadata: !!tsConfig?.compilerOptions?.emitDecoratorMetadata,
@@ -26,9 +22,24 @@ export function toSWCConfig(tsConfig: TSConfig): SWCConfig {
             },
             output: { charset: 'utf8' }
         },
-        sourceMaps: !!tsConfig?.compilerOptions?.sourceMap,
-        exclude: tsConfig?.exclude?.slice()
+        sourceMaps: !!tsConfig?.compilerOptions?.sourceMap
     };
+
+    if (tsConfig?.exclude instanceof Array) {
+        swcConfig.exclude = tsConfig.exclude.slice();
+    }
+
+    if (typeof tsConfig?.compilerOptions?.baseUrl === 'string') {
+        swcConfig.jsc!.baseUrl = tsConfig.compilerOptions.baseUrl;
+    }
+
+    if (tsConfig?.compilerOptions?.paths != null) {
+        const entries = Object
+            .entries(tsConfig.compilerOptions.paths)
+            .map(([ k, v ]) => [ k, v.slice() ]);
+
+        swcConfig.jsc!.paths = Object.fromEntries(entries);
+    }
 
     switch (tsConfig?.compilerOptions?.module) {
         case 'system': {

@@ -11,6 +11,7 @@ export async function loadTSConfig(target?: string | null, inject?: LoadTSConfig
     const readFileFn = inject?.readFile ?? fsPromises.readFile;
 
     const jsonPaths = [ target ?? 'tsconfig.json' ];
+    const usedPaths: string[] = [];
     const jsonFiles: TSConfig[] = [];
     let cwd = processObj.cwd();
 
@@ -22,6 +23,12 @@ export async function loadTSConfig(target?: string | null, inject?: LoadTSConfig
 
         if (!jsonPath.toLowerCase().endsWith('.json')) {
             jsonPath = path.resolve(jsonPath, 'tsconfig.json');
+        }
+
+        if (usedPaths.includes(jsonPath)) {
+            throw new Error(`The configuration file "${jsonPath}" is already merged`);
+        } else {
+            usedPaths.push(jsonPath);
         }
 
         cwd = path.dirname(jsonPath);

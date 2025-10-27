@@ -1,31 +1,22 @@
 import type { TSConfig } from './interfaces/index.js';
+import { normalizeExtends } from './normalize-extends.js';
 
 export function mergeTSConfig(...files: [ TSConfig, ...TSConfig[] ]): TSConfig {
     const tsConfig: TSConfig = {};
     for (const json of files) {
-        if (tsConfig.extends instanceof Array) {
-            if (json.extends instanceof Array) {
-                tsConfig.extends.push(...json.extends);
-            } else if (typeof json.extends === 'string') {
-                tsConfig.extends.push(json.extends);
-            }
-
-        } else if (typeof tsConfig.extends === 'string') {
-            if (json.extends instanceof Array) {
-                tsConfig.extends = [
-                    tsConfig.extends,
-                    ...json.extends
-                ];
-            } else if (typeof json.extends === 'string') {
-                tsConfig.extends = [
-                    tsConfig.extends,
-                    ...json.extends
-                ];
-            }
+        if (json.extends) {
+            tsConfig.extends = [
+                ...normalizeExtends(tsConfig.extends),
+                ...normalizeExtends(json.extends)
+            ];
         }
 
         if (json.exclude instanceof Array) {
-            tsConfig.exclude?.push(...json.exclude);
+            if (!tsConfig.exclude) {
+                tsConfig.exclude = json.exclude.slice();
+            } else {
+                tsConfig.exclude.push(...json.exclude);
+            }
         }
 
         if (json.compilerOptions) {
@@ -38,15 +29,15 @@ export function mergeTSConfig(...files: [ TSConfig, ...TSConfig[] ]): TSConfig {
             }
             
             if (typeof json.compilerOptions.target === 'string') {
-                tsConfig.compilerOptions.target = json.compilerOptions.target;
+                tsConfig.compilerOptions.target = json.compilerOptions.target.toLowerCase() as any;
             }
             
             if (typeof json.compilerOptions.module === 'string') {
-                tsConfig.compilerOptions.module = json.compilerOptions.module;
+                tsConfig.compilerOptions.module = json.compilerOptions.module.toLowerCase() as any;
             }
             
             if (typeof json.compilerOptions.moduleResolution === 'string') {
-                tsConfig.compilerOptions.moduleResolution = json.compilerOptions.moduleResolution;
+                tsConfig.compilerOptions.moduleResolution = json.compilerOptions.moduleResolution.toLowerCase() as any;
             }
             
             if (typeof json.compilerOptions.verbatimModuleSyntax === 'boolean') {

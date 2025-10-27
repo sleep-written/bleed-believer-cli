@@ -2,8 +2,8 @@ import type { LoadFnOutput, LoadHookContext, ResolveFnOutput, ResolveHookContext
 import type { Config as SWCConfig } from '@swc/core';
 import type { TSConfig } from '@lib/ts-config/index.js';
 
+import { SpecifierMatcher } from '@lib/specifier-matcher/index.js';
 import { toSWCConfig } from '@lib/ts-config/index.js';
-import { PathAlias } from '@lib/path-alias/index.js';
 
 type DefaultLoad = (
     url: string,
@@ -16,13 +16,13 @@ type DefaultResolve = (
 ) => ResolveFnOutput | Promise<ResolveFnOutput>;
 
 export class HookManager {
+    #matcher: SpecifierMatcher;
     #tsConfig: TSConfig;
     #swcConfig: SWCConfig;
-    #pathAlias: PathAlias;
 
     constructor(tsConfig: TSConfig) {
+        this.#matcher = new SpecifierMatcher(tsConfig);
         this.#tsConfig = tsConfig;
-        this.#pathAlias = new PathAlias(tsConfig);
         this.#swcConfig = toSWCConfig(tsConfig);
     }
 
@@ -31,8 +31,8 @@ export class HookManager {
         context: ResolveHookContext,
         defaultResolve: DefaultResolve
     ): Promise<ResolveFnOutput> {
-        
-        return defaultResolve(specifier, context);
+        const newSpecifier = await this.#matcher.find(specifier, context);
+        return defaultResolve(newSpecifier, context);
     }
 
     async load(
