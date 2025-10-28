@@ -1,10 +1,52 @@
-import type { TSConfig, LoadTSConfigInject } from './interfaces/index.js';
+import type { TSConfig, LoadTSConfigInject, Target, Module, ModuleResolution } from './interfaces/index.js';
 
-import { mergeTSConfig } from './merge-ts-config.js';
+import { Merger } from '@lib/merger/index.js';
 import fsPromises from 'fs/promises';
 import process from 'process';
 import JSON5 from 'json5';
 import path from 'path';
+
+const merger = new Merger<TSConfig>({
+    compilerOptions: new Merger({
+        strict:                 new Merger<boolean>(),
+        target:                 new Merger<Target>(c => c?.toLowerCase() as Target),
+        module:                 new Merger<Module>(c => c?.toLowerCase() as Module),
+        moduleResolution:       new Merger<ModuleResolution>(c => c?.toLowerCase() as ModuleResolution),
+
+        verbatimModuleSyntax:   new Merger<boolean>(),
+        emitDecoratorMetadata:  new Merger<boolean>(),
+        experimentalDecorators: new Merger<boolean>(),
+        esModuleInterop:        new Merger<boolean>(),
+        removeComments:         new Merger<boolean>(),
+
+        outDir:                 new Merger<string>(),
+        rootDir:                new Merger<string>(),
+        baseUrl:                new Merger<string>(),
+        sourceMap:              new Merger<boolean>(),
+        paths:                  new Merger<Record<string, string[]>>((incoming, original) => {
+            const out: Record<string, string[]> = {};
+
+            Object
+                .entries(original ?? {})
+                .forEach(([ k, v ]) => { out[k] = v.slice() });
+
+            Object
+                .entries(incoming)
+                .forEach(([ k, v ]) => {
+                    if (out[k] instanceof Array) {
+                        out[k] = [
+                            ...out[k],
+                            ...v
+                        ];
+                    } else {
+                        out[k] = v.slice();
+                    }
+                });
+
+            return out;
+        })
+    })
+});
 
 export async function loadTSConfig(target?: string | null, inject?: LoadTSConfigInject): Promise<TSConfig> {
     const processObj = inject?.process  ?? process;
@@ -48,17 +90,9 @@ export async function loadTSConfig(target?: string | null, inject?: LoadTSConfig
         jsonFiles.push(json);
     }
 
-    const tsConfig = mergeTSConfig({}, ...jsonFiles.reverse());
-    if (typeof tsConfig?.compilerOptions?.target === 'string') {
-        tsConfig.compilerOptions.target = tsConfig.compilerOptions.target.toLowerCase() as any;
-    }
-
-    if (typeof tsConfig?.compilerOptions?.module === 'string') {
-        tsConfig.compilerOptions.module = tsConfig.compilerOptions.module.toLowerCase() as any;
-    }
-
-    if (typeof tsConfig?.compilerOptions?.moduleResolution === 'string') {
-        tsConfig.compilerOptions.moduleResolution = tsConfig.compilerOptions.moduleResolution.toLowerCase() as any;
+    let tsConfig: TSConfig = {};
+    for (const jsonFile of jsonFiles.reverse()) {
+        tsConfig = merger.merge(jsonFile, tsConfig);
     }
 
     return tsConfig;

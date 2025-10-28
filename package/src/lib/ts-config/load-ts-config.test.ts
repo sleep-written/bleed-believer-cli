@@ -3,7 +3,7 @@ import type { LoadTSConfigInject, TSConfig } from './interfaces/index.js';
 import { loadTSConfig } from './load-ts-config.js';
 import test from 'ava';
 
-test('Read basic file', async t => {
+test.only('Read basic file', async t => {
     const inject: LoadTSConfigInject = {
         process: {
             cwd: () => '/path/to/project'
