@@ -13,11 +13,12 @@ const merger = new Merger<TSConfig>({
         module:                 new Merger<Module>(c => c?.toLowerCase() as Module),
         moduleResolution:       new Merger<ModuleResolution>(c => c?.toLowerCase() as ModuleResolution),
 
+        removeComments:         new Merger<boolean>(),
+        esModuleInterop:        new Merger<boolean>(),
+        resolveJsonModule:      new Merger<boolean>(),
         verbatimModuleSyntax:   new Merger<boolean>(),
         emitDecoratorMetadata:  new Merger<boolean>(),
         experimentalDecorators: new Merger<boolean>(),
-        esModuleInterop:        new Merger<boolean>(),
-        removeComments:         new Merger<boolean>(),
 
         outDir:                 new Merger<string>(),
         rootDir:                new Merger<string>(),

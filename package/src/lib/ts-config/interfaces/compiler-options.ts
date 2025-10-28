@@ -8,11 +8,12 @@ export interface CompilerOptions {
     module?: Module;
     moduleResolution?: ModuleResolution;
 
+    removeComments?: boolean;
+    esModuleInterop?: boolean;
+    resolveJsonModule?: boolean;
     verbatimModuleSyntax?: boolean;
     emitDecoratorMetadata?: boolean;
     experimentalDecorators?: boolean;
-    esModuleInterop?: boolean;
-    removeComments?: boolean;
 
     outDir?: string;
     rootDir?: string;

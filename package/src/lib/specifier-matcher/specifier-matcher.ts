@@ -44,11 +44,11 @@ export class SpecifierMatcher {
             return this.#cache.get(specifier)!;
         }
 
-        const parentDir = dirname(fileURLToPath(context.parentURL));
+        const parentDir = dirname(fileURLToPath(context.parentURL)) + sep;
         const paths = this.#pathAlias.find(specifier) ?? [];
         for (let path of paths) {
             if (parentDir.startsWith(this.#rootDir)) {
-                path = path.replace(/(?<=\.)j(?=s$)/i, 't');
+                path = path.replace(/(?<=\.m?)j(?=s$)/i, 't');
                 if (await this.#exists(path)) {
                     this.#cache.set(specifier, path);
                     return path;
@@ -56,7 +56,7 @@ export class SpecifierMatcher {
 
             } else if (parentDir.startsWith(this.#outDir)) {
                 path = replaceFromStart(path, this.#rootDir, this.#outDir)
-                    .replace(/(?<=\.)t(?=s$)/i, 'j');
+                    .replace(/(?<=\.m?)t(?=s$)/i, 'j');
 
                 if (await this.#exists(path)) {
                     this.#cache.set(specifier, path);
@@ -65,6 +65,20 @@ export class SpecifierMatcher {
             }
         }
 
-        return specifier;
+        if (/\.m?(j|t)s$/i.test(specifier)) {
+            const specifierTs = specifier.replace(/(?<=\.m?)j(?=s$)/i, 't');
+            const fullPathTs = resolve(parentDir, specifierTs);
+            if (await this.#exists(fullPathTs)) {
+                this.#cache.set(specifier, specifierTs);
+                return specifierTs;
+            } else {
+                this.#cache.set(specifier, specifier);
+                return specifier;
+            }
+
+        } else {
+            this.#cache.set(specifier, specifier);
+            return specifier;
+        }
     }
 }

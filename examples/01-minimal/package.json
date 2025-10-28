@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "dependencies": {
     "@bleed-believer/path-alias": "file:../../package"
   },
