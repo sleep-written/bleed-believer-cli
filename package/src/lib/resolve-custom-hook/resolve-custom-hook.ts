@@ -1,20 +1,22 @@
-import type { SpecifierMatcherInject, ResolveHookContext } from './interfaces/index.js';
+import type { ResolveFnOutput, ResolveHookContext } from 'module';
+import type { ResolveCustomHookInject, DefaultResolve } from './interfaces/index.js';
 import type { TSConfig } from '@lib/ts-config/index.js';
 
 import { dirname, resolve, sep } from 'path';
-import { replaceFromStart } from './replace-from-start.js';
 import { fileURLToPath } from 'url';
-import { PathAlias } from '@lib/path-alias/index.js';
 import { access } from 'fs/promises';
 
-export class SpecifierMatcher {
+import { replaceFromStart } from './replace-from-start.js';
+import { PathAlias } from '@lib/path-alias/index.js';
+
+export class ResolveCustomHook {
     #pathAlias: PathAlias;
     #rootDir: string;
     #outDir: string;
-    #inject: Required<SpecifierMatcherInject>;
+    #inject: Required<ResolveCustomHookInject>;
     #cache = new Map<string, string>();
 
-    constructor(tsConfig: TSConfig, inject?: SpecifierMatcherInject) {
+    constructor(tsConfig: TSConfig, inject?: ResolveCustomHookInject) {
         this.#pathAlias = new PathAlias(tsConfig, inject);
         this.#inject = {
             process: inject?.process ?? process,
@@ -35,7 +37,7 @@ export class SpecifierMatcher {
         }
     }
 
-    async find(specifier: string, context: ResolveHookContext): Promise<string> {
+    async #customResolve(specifier: string, context: ResolveHookContext): Promise<string> {
         if (typeof context.parentURL !== 'string') {
             return specifier;
         }
@@ -79,6 +81,23 @@ export class SpecifierMatcher {
         } else {
             this.#cache.set(specifier, specifier);
             return specifier;
+        }
+    }
+
+    async resolve(
+        specifier: string,
+        context: ResolveHookContext,
+        defaultResolve: DefaultResolve
+    ): Promise<ResolveFnOutput> {
+        try {
+            const defaultResult = await defaultResolve(specifier, context);
+            return {
+                ...defaultResult,
+                shortCircuit: true
+            };
+        } catch {
+            const customSpecifier = await this.#customResolve(specifier, context);
+            return defaultResolve(customSpecifier, context);
         }
     }
 }
