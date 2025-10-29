@@ -1,8 +1,9 @@
 import type { DefaultLoad, LoadCustomHookInject } from './interfaces/index.js';
 import type { LoadFnOutput, LoadHookContext } from 'module';
-import { TSConfig } from '@lib/ts-config/index.js';
 
+import { fileURLToPath, pathToFileURL } from 'url';
 import { LoadCustomHook } from './load-custom-hook.js';
+import { TSConfig } from '@lib/ts-config/index.js';
 import test from 'ava';
 
 const inject: LoadCustomHookInject = {
@@ -18,16 +19,17 @@ const inject: LoadCustomHookInject = {
 };
 
 const defaultLoad: DefaultLoad = (url) => {
-    switch (url) {
-        case 'foo.ts':
-        case 'bar.ts': {
+    const path = fileURLToPath(url);
+    switch (path) {
+        case '/path/to/project/src/foo.ts':
+        case '/path/to/project/src/bar.ts': {
             return {
                 format: 'typescript-module',
-                source: `js file → "${url}"`
+                source: `js file → "${path}"`
             };
         }
 
-        case 'config.json': {
+        case '/path/to/project/config.json': {
             return {
                 format: 'json',
                 source: JSON.stringify({
@@ -59,10 +61,11 @@ test('Load "foo.ts"', async t => {
         importAttributes: {}
     };
 
-    const output = await loadHook.load('foo.ts', context, defaultLoad);
+    const url = pathToFileURL('/path/to/project/src/foo.ts').href;
+    const output = await loadHook.load(url, context, defaultLoad);
     t.deepEqual(output, {
         format: 'typescript-module',
-        source: 'ts file → "foo.ts"',
+        source: 'ts file → "/path/to/project/src/foo.ts"',
         shortCircuit: true,
     } as LoadFnOutput);
 });
@@ -75,10 +78,11 @@ test('Load "bar.ts"', async t => {
         importAttributes: {}
     };
 
-    const output = await loadHook.load('bar.ts', context, defaultLoad);
+    const url = pathToFileURL('/path/to/project/src/bar.ts').href;
+    const output = await loadHook.load(url, context, defaultLoad);
     t.deepEqual(output, {
         format: 'typescript-module',
-        source: 'ts file → "bar.ts"',
+        source: 'ts file → "/path/to/project/src/bar.ts"',
         shortCircuit: true,
     } as LoadFnOutput);
 });
@@ -91,7 +95,8 @@ test('Load "config.json"', async t => {
         importAttributes: {}
     };
 
-    const output = await loadHook.load('config.json', context, defaultLoad);
+    const url = pathToFileURL('/path/to/project/config.json').href;
+    const output = await loadHook.load(url, context, defaultLoad);
     t.deepEqual(output, {
         format: 'json',
         source: JSON.stringify({
@@ -109,8 +114,9 @@ test('Load invalid file', async t => {
         importAttributes: {}
     };
 
+    const url = pathToFileURL('/path/to/project/ick2.zod').href;
     await t.throwsAsync(
-        () => loadHook.load('ick2.zod', context, defaultLoad),
+        () => loadHook.load(url, context, defaultLoad),
         { message: 'File not found!' }
     )
 });

@@ -6,6 +6,7 @@
 
         "rootDir": "src",
         "baseUrl": "src",
+        "sourceMap": true,
 
         "paths": {
             "@lib/*": [ "./lib/*" ]
