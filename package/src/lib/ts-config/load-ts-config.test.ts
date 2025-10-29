@@ -3,7 +3,7 @@ import type { LoadTSConfigInject, TSConfig } from './interfaces/index.js';
 import { loadTSConfig } from './load-ts-config.js';
 import test from 'ava';
 
-test.only('Read basic file', async t => {
+test('Read basic file', async t => {
     const inject: LoadTSConfigInject = {
         process: {
             cwd: () => '/path/to/project'
@@ -32,7 +32,8 @@ test.only('Read basic file', async t => {
         compilerOptions: {
             strict: true,
             target: 'esnext',
-            module: 'nodenext'
+            module: 'nodenext',
+            moduleResolution: 'nodenext'
         }
     });
 });
@@ -77,6 +78,7 @@ test('Read basic file with one extends', async t => {
             strict: true,
             target: 'esnext',
             module: 'nodenext',
+            moduleResolution: 'nodenext',
             outDir: 'dist',
             rootDir: 'src'
         }
@@ -125,6 +127,7 @@ test('Read basic file with one extends (with an override)', async t => {
             strict: true,
             target: 'esnext',
             module: 'nodenext',
+            moduleResolution: 'nodenext',
             outDir: 'dist',
             rootDir: 'src',
             sourceMap: false
