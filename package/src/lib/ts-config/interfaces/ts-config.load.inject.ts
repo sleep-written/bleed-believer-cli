@@ -1,4 +1,4 @@
-export interface LoadTSConfigInject {
+export interface TSConfigLoadInject {
     process?: {
         cwd(): string;
     };
@@ -7,4 +7,8 @@ export interface LoadTSConfigInject {
         path: string,
         encoding: 'utf-8'
     ) => Promise<string>;
+
+    access?: (
+        path: string
+    ) => Promise<void>;
 }

@@ -24,8 +24,8 @@ export class ResolveCustomHook {
         };
 
         const cwd = this.#inject.process.cwd();
-        this.#rootDir = resolve(cwd, tsConfig?.compilerOptions?.rootDir ?? '.') + sep;
-        this.#outDir =  resolve(cwd, tsConfig?.compilerOptions?.outDir  ?? '.') + sep;
+        this.#rootDir = resolve(cwd, tsConfig.value?.compilerOptions?.rootDir ?? '.') + sep;
+        this.#outDir =  resolve(cwd, tsConfig.value?.compilerOptions?.outDir  ?? '.') + sep;
     }
 
     async #exists(path: string): Promise<boolean> {

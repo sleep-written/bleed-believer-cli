@@ -1,10 +1,10 @@
 import type { PathAliasInject } from './interfaces/index.js';
-import type { TSConfig } from '@lib/ts-config/index.js';
 
 import { PathAlias } from './path-alias.js';
+import { TSConfig } from '@lib/ts-config/index.js';
 import test from 'ava';
 
-const tsConfig: TSConfig = {
+const tsConfig = new TSConfig({
     compilerOptions: {
         baseUrl: 'src',
         paths: {
@@ -22,7 +22,7 @@ const tsConfig: TSConfig = {
             ]
         }
     }
-};
+});
 
 const inject: PathAliasInject = {
     process: { cwd: () => '/path/to/project' }

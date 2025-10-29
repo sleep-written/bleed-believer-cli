@@ -8,12 +8,12 @@ export class PathAlias {
     #paths: { pattern: RegExp; paths: string[]; }[];
 
     constructor(tsConfig: TSConfig, inject?: PathAliasInject) {
-        const baseUrl = tsConfig.compilerOptions?.baseUrl ?? '.';
+        const baseUrl = tsConfig.value.compilerOptions?.baseUrl ?? '.';
         const cwd = (inject?.process ?? process).cwd();
 
         this.#baseUrl = path.resolve(cwd, baseUrl);
         this.#paths = Object
-            .entries(tsConfig.compilerOptions?.paths ?? {})
+            .entries(tsConfig.value.compilerOptions?.paths ?? {})
             .map(([ alias, paths ]) => ({
                 pattern: new RegExp(
                     alias

@@ -1,7 +1,11 @@
-import type { Module, ModuleResolution, Target, TSConfig } from './interfaces/index.js';
+import type { TsConfigValue, Module, ModuleResolution, Target } from './interfaces/index.js';
 import { Merger } from '@lib/merger/index.js';
 
-export const tsConfigMerger = new Merger<TSConfig>({
+export const tsConfigMerger = new Merger<TsConfigValue>({
+    exclude: new Merger<string[]>((incoming, original) => [
+        ...(original ?? []),
+        ...(incoming ?? []),
+    ]),
     compilerOptions: new Merger({
         strict:                 new Merger<boolean>(),
         target:                 new Merger<Target>(c => c?.toLowerCase() as Target),

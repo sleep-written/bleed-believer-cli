@@ -1,8 +1,10 @@
-import type { Config as SWCConfig } from '@swc/core';
-import type { TSConfig } from './interfaces/index.js';
+import { resolve } from 'path';
+import type { TsConfigValue, TSConfigInject } from './interfaces/index.js';
+import type { Config } from '@swc/core';
 
-export function toSWCConfig(tsConfig: TSConfig): SWCConfig {
-    const swcConfig: SWCConfig = {
+export function tsConfigToSWC(tsConfig: TsConfigValue, inject?: TSConfigInject): Config {
+    const processObj = inject?.process ?? process;
+    const swcConfig: Config = {
         jsc: {
             target: tsConfig?.compilerOptions?.target !== 'es6'
                 ?   tsConfig?.compilerOptions?.target ?? 'esnext'
@@ -30,7 +32,10 @@ export function toSWCConfig(tsConfig: TSConfig): SWCConfig {
     }
 
     if (typeof tsConfig?.compilerOptions?.baseUrl === 'string') {
-        swcConfig.jsc!.baseUrl = tsConfig.compilerOptions.baseUrl;
+        swcConfig.jsc!.baseUrl = resolve(
+            processObj.cwd(),
+            tsConfig.compilerOptions.baseUrl
+        );
     }
 
     if (tsConfig?.compilerOptions?.paths != null) {

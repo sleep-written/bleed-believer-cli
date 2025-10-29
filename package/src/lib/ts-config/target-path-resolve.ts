@@ -1,9 +1,9 @@
-import type { LoadTSConfigInject } from './interfaces/index.js';
+import type { TSConfigLoadInject } from './interfaces/index.js';
 import { isAbsolute, resolve } from 'path';
 
 export function targetPathResolve(
     target?: string | null,
-    inject?: LoadTSConfigInject
+    inject?: TSConfigLoadInject
 ): string {
     const processObj = inject?.process ?? process;
     if (typeof target !== 'string') {

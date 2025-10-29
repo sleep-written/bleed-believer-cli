@@ -1,9 +1,9 @@
-import type { LoadTSConfigInject } from './interfaces/index.js';
+import type { TSConfigLoadInject } from './interfaces/index.js';
 
 import { targetPathResolve } from './target-path-resolve.js';
 import test from 'ava';
 
-const inject: LoadTSConfigInject = {
+const inject: TSConfigLoadInject = {
     process: {
         cwd: () => '/path/to/project'
     }

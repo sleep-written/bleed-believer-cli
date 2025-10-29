@@ -1,6 +1,6 @@
 import type { DefaultLoad, LoadCustomHookInject } from './interfaces/index.js';
 import type { LoadFnOutput, LoadHookContext } from 'module';
-import type { TSConfig } from '@lib/ts-config/index.js';
+import { TSConfig } from '@lib/ts-config/index.js';
 
 import { LoadCustomHook } from './load-custom-hook.js';
 import test from 'ava';
@@ -43,13 +43,13 @@ const defaultLoad: DefaultLoad = (url) => {
     }
 };
 
-const tsConfig: TSConfig = {
+const tsConfig = new TSConfig({
     compilerOptions: {
         target: 'es2024',
         module: 'node20',
         moduleResolution: 'node16'
     }
-};
+});
 
 test('Load "foo.ts"', async t => {
     const loadHook = new LoadCustomHook(tsConfig, inject);

@@ -1,8 +1,9 @@
 import type { ResolveCustomHookInject, DefaultResolve } from './interfaces/index.js';
 import type { ResolveHookContext } from 'module';
-import type { TSConfig } from '@lib/ts-config/index.js';
 
 import { ResolveCustomHook } from './resolve-custom-hook.js';
+import { TSConfig } from '@lib/ts-config/index.js';
+
 import { pathToFileURL } from 'url';
 import test from 'ava';
 
@@ -46,7 +47,7 @@ const defaultResolve: DefaultResolve = (specifier) => {
     }
 };
 
-const tsConfig: TSConfig = {
+const tsConfig = new TSConfig({
     compilerOptions: {
         outDir: 'dist',
         baseUrl: 'src',
@@ -56,7 +57,7 @@ const tsConfig: TSConfig = {
             '@tool/*': [ 'tool/*' ]
         }
     }
-};
+});
 
 test('"crypto" → "crypto" (builtin)', async t => {
     const context: ResolveHookContext = {

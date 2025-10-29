@@ -1,8 +1,18 @@
-import { toSWCConfig } from './to-swc-config.js';
+import type { TSConfigInject } from './interfaces/index.js';
+
+import { tsConfigToSWC } from './ts-config.to-swc.js';
+import { TSConfig } from './ts-config.js';
 import test from 'ava';
 
+const inject: TSConfigInject = {
+    process: {
+        cwd: () => '/path/to/project'
+    }
+};
+
 test('Minimal configuration', t => {
-    const swcConfig = toSWCConfig({});
+    const tsConfig = new TSConfig({});
+    const swcConfig = tsConfigToSWC(tsConfig.value, inject);
     t.deepEqual(swcConfig, {
         jsc: {
             target: 'esnext',
@@ -30,7 +40,8 @@ test('Minimal configuration', t => {
 });
 
 test('es2024 with experimental decorators', t => {
-    const swcConfig = toSWCConfig({
+    const tsConfig = new TSConfig({
+        exclude: [ './src/**/*.test.ts' ],
         compilerOptions: {
             strict: true,
             target: 'es2024',
@@ -46,16 +57,14 @@ test('es2024 with experimental decorators', t => {
             paths: {
                 '@lib/*': [ './lib/*' ]
             }
-        },
-        exclude: [
-            './src/**/*.test.ts'
-        ]
+        }
     });
 
+    const swcConfig = tsConfigToSWC(tsConfig.value, inject);
     t.deepEqual(swcConfig, {
         jsc: {
             target: 'es2024',
-            baseUrl: './src',
+            baseUrl: '/path/to/project/src',
             paths: {
                 '@lib/*': [ './lib/*' ]
             },
