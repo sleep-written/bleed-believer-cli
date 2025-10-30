@@ -6,7 +6,10 @@ import { tsConfigLoad } from './ts-config.load.js';
 
 export class TSConfig {
     static async load(target?: string | null, inject?: TSConfigLoadInject): Promise<TSConfig> {
-        return tsConfigLoad(target, inject);
+        const value = await tsConfigLoad(target, inject);
+        return new TSConfig(value, {
+            process: inject?.process
+        });
     }
 
     #inject: Required<TSConfigInject>;

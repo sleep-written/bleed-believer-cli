@@ -16,11 +16,12 @@
     },
     "baseUrl": "./src",
     "paths": {
+      "@cli/*": [ "./cli/*" ],
       "@lib/*": [ "./lib/*" ],
       "@/*": [ "./*" ]
     }
   },
-  "sourceMaps": false,
+  "sourceMaps": true,
   "exclude": [
     ".fake.ts",
     ".mock.ts",

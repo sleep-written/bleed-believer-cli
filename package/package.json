@@ -1,7 +1,7 @@
 {
-  "name": "@bleed-believer/path-alias",
-  "version": "2.3.2",
-  "description": "Assign path alias using tsconfig.json file",
+  "name": "@bleed-believer/cli",
+  "version": "0.0.0",
+  "description": "ts-node replacement with path alias resolution and SWC under hood",
   "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +19,7 @@
     }
   },
   "bin": {
-    "bb-path-alias": "./dist/cli.js"
+    "bleed": "./dist/cli.js"
   },
   "scripts": {
     "test": "node --run clean && swc ./src -d ./dist --strip-leading-paths && tsc && ava",
@@ -30,12 +30,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sleep-written/bleed-believer-path-alias.git"
+    "url": "git+https://github.com/sleep-written/bleed-believer-cli.git"
   },
   "keywords": [
     "ts",
+    "swc",
     "typescript",
+    "tsnode",
     "tsconfig",
+    "ts-node",
     "ts-config",
     "tsconfig.json",
     "path",
@@ -48,20 +51,21 @@
   "author": "sleep-written",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "bugs": {
-    "url": "https://github.com/sleep-written/bleed-believer-path-alias/issues"
+    "url": "https://github.com/sleep-written/bleed-believer-cli/issues"
   },
-  "homepage": "https://github.com/sleep-written/bleed-believer-path-alias#readme",
+  "homepage": "https://github.com/sleep-written/bleed-believer-cli#readme",
   "devDependencies": {
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.9.2",
     "ava": "^6.4.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@swc/cli": "^0.7.8",
-    "@swc/core": "^1.13.5",
-    "json5": "^2.2.3"
+    "@swc/core": "^1.14.0",
+    "json5": "^2.2.3",
+    "tslog": "^4.10.2"
   }
 }

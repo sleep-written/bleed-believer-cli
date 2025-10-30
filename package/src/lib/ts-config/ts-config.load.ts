@@ -2,12 +2,12 @@ import type { TSConfigLoadInject, TsConfigValue } from './interfaces/index.js';
 
 import { targetPathResolve } from './target-path-resolve.js';
 import { tsConfigMerger } from './ts-config.merger.js';
-import { TSConfig } from './ts-config.js';
 
+import { dirname, resolve } from 'path';
 import { access, readFile } from 'fs/promises';
 import JSON5 from 'json5';
 
-export async function tsConfigLoad(target?: string | null, inject?: TSConfigLoadInject): Promise<TSConfig> {
+export async function tsConfigLoad(target?: string | null, inject?: TSConfigLoadInject): Promise<TsConfigValue> {
     const accessFn =   inject?.access   ?? access;
     const readFileFn = inject?.readFile ?? readFile;
 
@@ -25,19 +25,22 @@ export async function tsConfigLoad(target?: string | null, inject?: TSConfigLoad
         try {
             await accessFn(target);
         } catch (err: any) {
-            return new TSConfig(tsConfig);
+            return tsConfig;
         }
     } else {
         target = targetPathResolve(target, inject);
     }
 
+    const jsonCache: string[] = [];
     const jsonPaths: string[] = [ target ];
     const jsonFiles: TsConfigValue[] = [];
 
     while (jsonPaths.length > 0) {
         const path = jsonPaths.shift()!;
-        if (jsonPaths.includes(path)) {
+        if (jsonCache.includes(path)) {
             throw new Error(`The path "${path}" was already readed`);
+        } else {
+            jsonCache.push(path);
         }
 
         const text = await readFileFn(path, 'utf-8');
@@ -45,9 +48,13 @@ export async function tsConfigLoad(target?: string | null, inject?: TSConfigLoad
         jsonFiles.push(json);
 
         if (json.extends instanceof Array) {
-            jsonPaths.push(...json.extends);
+            json.extends
+                .map(x => resolve(dirname(path), x))
+                .forEach(x => { jsonPaths.push(x) });
+
         } else if (typeof json.extends === 'string') {
-            jsonPaths.push(json.extends);
+            const parent = resolve(dirname(path), json.extends);
+            jsonPaths.push(parent);
         }
     }
 
@@ -55,5 +62,5 @@ export async function tsConfigLoad(target?: string | null, inject?: TSConfigLoad
         tsConfig = tsConfigMerger.merge(json, tsConfig);
     }
 
-    return new TSConfig(tsConfig, { process: inject?.process });
+    return tsConfig;
 }

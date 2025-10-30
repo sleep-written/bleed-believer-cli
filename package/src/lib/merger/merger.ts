@@ -11,6 +11,14 @@ export class Merger<T> {
         if (incoming === undefined) {
             return original;
         }
+        
+        if (typeof incoming === 'object' && incoming != null) {
+            incoming = structuredClone(incoming);
+        }
+        
+        if (typeof original === 'object' && original != null) {
+            original = structuredClone(original);
+        }
 
         if (typeof this.#transform === 'function') {
             const value = this.#transform(incoming, original);

@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@bleed-believer/path-alias": "file:../../package"
+    "@bleed-believer/cli": "file:../../package"
   },
   "devDependencies": {
     "@types/node": "^24.9.1"
