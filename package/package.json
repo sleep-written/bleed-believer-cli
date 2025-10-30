@@ -1,7 +1,7 @@
 {
   "name": "@bleed-believer/cli",
   "version": "0.0.0",
-  "description": "ts-node replacement with path alias resolution and SWC under hood",
+  "description": "A ts-node replacement with path alias resolution and SWC under the hood",
   "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,6 +19,7 @@
     }
   },
   "bin": {
+    "@bleed-believer/path-alias": "./dist/cli.js",
     "bleed": "./dist/cli.js"
   },
   "scripts": {

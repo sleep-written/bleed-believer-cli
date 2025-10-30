@@ -1,0 +1,1 @@
+export type { TranspilerInject } from './transpiler.inject.js';
