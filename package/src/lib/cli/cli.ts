@@ -14,6 +14,13 @@ export class Cli<T> {
         this.#routes = routes;
     }
 
+    docs() {
+        return this.#routes.map(x => ({
+            name: x.name,
+            info: x.info }
+        ));
+    }
+
     async execute(): Promise<T> {
         for (const { path, target } of this.#routes) {
             if (

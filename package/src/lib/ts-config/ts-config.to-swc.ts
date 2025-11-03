@@ -31,6 +31,14 @@ export function tsConfigToSWC(tsConfig: TsConfigValue, inject?: TSConfigInject):
         swcConfig.exclude = tsConfig.exclude.slice();
     }
 
+    if (tsConfig.compilerOptions?.resolveJsonModule) {
+        if (!swcConfig.jsc!.experimental) {
+            swcConfig.jsc!.experimental = {};
+        }
+
+        swcConfig.jsc!.experimental!.keepImportAssertions = true;
+    }
+
     if (typeof tsConfig?.compilerOptions?.baseUrl === 'string') {
         swcConfig.jsc!.baseUrl = resolve(
             processObj.cwd(),
@@ -63,6 +71,7 @@ export function tsConfigToSWC(tsConfig: TsConfigValue, inject?: TSConfigInject):
                 strictMode: !!tsConfig?.compilerOptions?.strict,
                 resolveFully: true,
                 allowTopLevelThis: true,
+                preserveImportMeta: true,
                 exportInteropAnnotation: true,
                 importInterop: tsConfig?.compilerOptions?.moduleResolution === 'bundler'
                     ?   'swc'
@@ -78,10 +87,11 @@ export function tsConfigToSWC(tsConfig: TsConfigValue, inject?: TSConfigInject):
                 strictMode: !!tsConfig?.compilerOptions?.strict,
                 resolveFully: true,
                 allowTopLevelThis: true,
+                preserveImportMeta: true,
                 exportInteropAnnotation: true,
                 importInterop: tsConfig?.compilerOptions?.moduleResolution === 'bundler'
                     ?   'swc'
-                    :   'node'
+                    :   'node',
             };
         }
     }

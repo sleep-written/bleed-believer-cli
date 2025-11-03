@@ -130,7 +130,8 @@ test('Initialize with a simple tsconfig.json file with extends', async t => {
 
             outDir: 'dist',
             rootDir: 'src'
-        }
+        },
+        extends: '../tsconfig.json'
     } as TsConfigValue);
 });
 

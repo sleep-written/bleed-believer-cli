@@ -4,9 +4,11 @@
         "module": "node20",
         "moduleResolution": "node16",
 
+        "outDir": "dist",
         "rootDir": "src",
         "baseUrl": "src",
         "sourceMap": true,
+        "resolveJsonModule": true,
 
         "paths": {
             "@lib/*": [ "./lib/*" ]

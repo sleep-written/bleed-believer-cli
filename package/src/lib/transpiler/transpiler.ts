@@ -1,34 +1,31 @@
 import type { TranspilerInject } from './interfaces/index.js';
-import type { TSConfig } from '@lib/ts-config/ts-config.js';
 import type { Config, Options } from '@swc/core';
+import type { TSConfig } from '@lib/ts-config/index.js';
 
-import { readFile, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
+import { dirname, resolve } from 'path';
 import { transform } from '@swc/core';
-import { logger } from '@/logger.js';
-import { resolve } from 'path';
-import type { Dirent } from 'fs';
 
 export class Transpiler {
     #config: Config;
     #inject: Required<TranspilerInject>;
 
-    #cwd: string;
     #outDir: string;
     #rootDir: string;
 
     constructor(tsConfig: TSConfig, inject?: TranspilerInject) {
         this.#config = tsConfig.toSWC();
         this.#inject = {
-            logger:     inject?.logger      ?? logger,
-            process:    inject?.process     ?? process,
-            readFile:   inject?.readFile    ?? readFile,
-            writeFile:  inject?.writeFile   ?? writeFile,
-            transform:  inject?.transform   ?? transform
+            process:    inject?.process                 ?? process,
+            mkdir:      inject?.mkdir    ?.bind(inject) ?? mkdir,
+            readFile:   inject?.readFile ?.bind(inject) ?? readFile,
+            writeFile:  inject?.writeFile?.bind(inject) ?? writeFile,
+            transform:  inject?.transform?.bind(inject) ?? transform
         };
 
-        this.#cwd = this.#inject.process.cwd();
-        this.#outDir = resolve(tsConfig.value?.compilerOptions?.outDir ?? '.');
-        this.#rootDir = resolve(tsConfig.value?.compilerOptions?.rootDir ?? '.');
+        const cwd = this.#inject.process.cwd();
+        this.#outDir = resolve(cwd, tsConfig.value?.compilerOptions?.outDir ?? '.');
+        this.#rootDir = resolve(cwd, tsConfig.value?.compilerOptions?.rootDir ?? '.');
     }
 
     #outputPaths(file: { name: string; parentPath: string }): { code: string; map: string; } {
@@ -52,8 +49,12 @@ export class Transpiler {
         const source = await this.#inject.readFile(options.filename, 'utf-8');
         const output = await this.#inject.transform(source, options);
 
+        const outputDir = dirname(paths.code);
+        await this.#inject.mkdir(outputDir, { recursive: true });
         await this.#inject.writeFile(paths.code, output.code, 'utf-8');
         if (output.map) {
+            const outputDirMap = dirname(paths.code);
+            await this.#inject.mkdir(outputDirMap, { recursive: true });
             await this.#inject.writeFile(paths.map, output.map, 'utf-8');
         }
     }

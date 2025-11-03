@@ -1,13 +1,17 @@
 import type { ArgvRoute, Command, CommandContext } from '@lib/cli/index.js';
 import type { Dirent } from 'fs';
 
+import { Transpiler } from '@lib/transpiler/index.js';
 import { TSConfig } from '@lib/ts-config/ts-config.js';
-import { join, resolve } from 'path';
-import { glob, readFile } from 'fs/promises';
-import { transform, type Config, type Options } from '@swc/core';
 import { logger } from '@/logger.js';
 
+import { join, resolve } from 'path';
+import { glob } from 'fs/promises';
+
 export const buildCommand: ArgvRoute<void> = {
+    name: 'npx bleed build [--config path/to/tsconfig.json]',
+    info: 'Transpile all files to JavaScript (like `tsc`, but faster).',
+
     path: [ 'build' ],
     target: class implements Command<void> {
         async #getSourceFiles(tsConfig: TSConfig): Promise<Dirent<string>[]> {
@@ -38,11 +42,18 @@ export const buildCommand: ArgvRoute<void> = {
             );
 
             const tsConfig = await TSConfig.load(customTarget);
-            const config = tsConfig.toSWC();
             const files = await this.#getSourceFiles(tsConfig);
-
+            
+            const transpiler = new Transpiler(tsConfig);
+            const cwd = process.cwd();
             for (const file of files) {
-                // await this.#transpile(config, file);
+                const path = join(
+                    file.parentPath.slice(cwd.length),
+                    file.name
+                );
+
+                logger.info(`Transpiling "${path}"`);
+                await transpiler.transpile(file);
             }
         }
     }

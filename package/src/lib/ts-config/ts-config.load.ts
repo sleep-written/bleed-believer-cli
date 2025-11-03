@@ -58,7 +58,7 @@ export async function tsConfigLoad(target?: string | null, inject?: TSConfigLoad
         }
     }
 
-    for (const json of jsonFiles) {
+    for (const json of jsonFiles.toReversed()) {
         tsConfig = tsConfigMerger.merge(json, tsConfig);
     }
 

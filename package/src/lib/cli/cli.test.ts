@@ -11,6 +11,7 @@ interface CommandResult {
 
 const routes: ArgvRoute<CommandResult>[] = [
     {
+        name: 'hola',
         path: [ 'hola' ],
         target: class implements Command<CommandResult> {
             async execute(context: CommandContext): Promise<CommandResult> {
@@ -19,6 +20,7 @@ const routes: ArgvRoute<CommandResult>[] = [
         }
     },
     {
+        name: 'hola mundo',
         path: [ 'hola', 'mundo' ],
         target: class implements Command<CommandResult> {
             async execute(context: CommandContext): Promise<CommandResult> {
@@ -27,6 +29,7 @@ const routes: ArgvRoute<CommandResult>[] = [
         }
     },
     {
+        name: 'exec :target',
         path: [ 'exec', ':target' ],
         target: class implements Command<CommandResult> {
             async execute(context: CommandContext): Promise<CommandResult> {
@@ -35,6 +38,7 @@ const routes: ArgvRoute<CommandResult>[] = [
         }
     },
     {
+        name: 'exec :target ...',
         path: [ 'exec', ':target', '...' ],
         target: class implements Command<CommandResult> {
             async execute(context: CommandContext): Promise<CommandResult> {

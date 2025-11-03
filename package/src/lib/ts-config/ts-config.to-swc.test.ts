@@ -33,6 +33,7 @@ test('Minimal configuration', t => {
             strictMode: false,
             resolveFully: true,
             allowTopLevelThis: true,
+            preserveImportMeta: true,
             exportInteropAnnotation: true,
             importInterop: 'node'
         }
@@ -47,6 +48,7 @@ test('es2024 with experimental decorators', t => {
             target: 'es2024',
             module: 'node20',
             moduleResolution: 'node16',
+            resolveJsonModule: true,
             verbatimModuleSyntax: true,
             emitDecoratorMetadata: true,
             experimentalDecorators: true,
@@ -76,7 +78,10 @@ test('es2024 with experimental decorators', t => {
                 legacyDecorator: false
             },
             parser: { syntax: 'typescript', decorators: true },
-            output: { charset: 'utf8' }
+            output: { charset: 'utf8' },
+            experimental: {
+                keepImportAssertions: true
+            }
         },
         sourceMaps: false,
         exclude: [
@@ -88,6 +93,7 @@ test('es2024 with experimental decorators', t => {
             strictMode: true,
             resolveFully: true,
             allowTopLevelThis: true,
+            preserveImportMeta: true,
             exportInteropAnnotation: true,
             importInterop: 'node'
         },
