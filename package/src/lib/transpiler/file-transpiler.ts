@@ -6,7 +6,7 @@ import { mkdir, readFile, writeFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import { transform } from '@swc/core';
 
-export class Transpiler {
+export class FileTranspiler {
     #config: Config;
     #inject: Required<TranspilerInject>;
 

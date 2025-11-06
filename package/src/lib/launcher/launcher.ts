@@ -1,17 +1,13 @@
 import type { LauncherInject } from './interfaces/index.js';
 import { spawn } from 'child_process';
-import { Argv } from '@lib/cli/index.js';
 
 export class Launcher {
     #args: string[];
     #target: string;
     #inject: Required<LauncherInject>;
 
-    constructor(target: string, inject?: LauncherInject) {
-        this.#args   = Argv
-            .parse({ process: inject?.process })
-            .flags['--'] ?? [];
-
+    constructor(target: string, args?: string[], inject?: LauncherInject) {
+        this.#args   = args?.slice() ?? [];
         this.#target = target;
         this.#inject = {
             process:    inject?.process             ?? process,

@@ -1,10 +1,10 @@
 import type { TranspilerInject } from './interfaces/index.js';
 import type { Options, Output } from '@swc/core';
 
-import { Transpiler } from './transpiler.js';
+import { FileTranspiler } from './file-transpiler.js';
 import { TSConfig } from '@lib/ts-config/ts-config.js';
-import test from 'ava';
 import { join } from 'path';
+import test from 'ava';
 
 class TranspilerInjectorFactory implements TranspilerInject {
     filesystem: Record<string, any> = {};
@@ -82,7 +82,7 @@ test('Transpile "/path/to/project/src/index.ts"', async t => {
         { process: inject.process }
     );
 
-    const transpiler = new Transpiler(tsConfig, inject);
+    const transpiler = new FileTranspiler(tsConfig, inject);
     await transpiler.transpile({ name: 'index.ts', parentPath: '/path/to/project/src' });
 
     const source = inject.filesystem['/path/to/project/src/index.ts'];
@@ -110,7 +110,7 @@ test('Transpile "/path/to/project/src/utils/bar.ts"', async t => {
         { process: inject.process }
     );
 
-    const transpiler = new Transpiler(tsConfig, inject);
+    const transpiler = new FileTranspiler(tsConfig, inject);
     await transpiler.transpile({ name: 'bar.ts', parentPath: '/path/to/project/src/utils' });
 
     const source = inject.filesystem['/path/to/project/src/utils/bar.ts'];
@@ -138,7 +138,7 @@ test('Transpile "/path/to/project/src/tools/kek.ts"', async t => {
         { process: inject.process }
     );
 
-    const transpiler = new Transpiler(tsConfig, inject);
+    const transpiler = new FileTranspiler(tsConfig, inject);
     await transpiler.transpile({ name: 'kek.ts', parentPath: '/path/to/project/src/tools' });
 
     const source = inject.filesystem['/path/to/project/src/tools/kek.ts'];

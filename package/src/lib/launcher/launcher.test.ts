@@ -59,11 +59,7 @@ class LauncherInjectObject implements LauncherInject {
         return this.#child;
     }
 
-    constructor(
-        args: string[],
-        events: Event[]
-    ) {
-        this.process!.argv!.push(...args);
+    constructor(events: Event[]) {
         this.#events = events;
     }
 
@@ -91,15 +87,14 @@ class LauncherInjectObject implements LauncherInject {
 
 test('Start node process', async t => {
     const inject = new LauncherInjectObject(
-        [ '--', 'hello', 'world' ],
         [
             { output: 'stdout', message: 'jajaja', ms: 500 },
             { output: 'stdout', message: 'gegege', ms: 500 },
             { output: 'stdout', message: 'ñeeeee', ms: 500, exit: true },
         ]
-    )
+    );
 
-    const launcher = new Launcher('/path/to/project/src/index.ts', inject);
+    const launcher = new Launcher('/path/to/project/src/index.ts',[ 'hello', 'world' ], inject);
     await launcher.execute();
 
     t.deepEqual(inject.child?.options, { stdio: 'inherit' });
@@ -117,7 +112,6 @@ test('Start node process', async t => {
 
 test('Watch node process', async t => {
     const inject = new LauncherInjectObject(
-        [ '--', 'hello', 'world' ],
         [
             { output: 'stdout', message: 'jajaja', ms: 500 },
             { output: 'stdout', message: 'gegege', ms: 500 },
@@ -125,7 +119,7 @@ test('Watch node process', async t => {
         ]
     )
 
-    const launcher = new Launcher('/path/to/project/src/index.ts', inject);
+    const launcher = new Launcher('/path/to/project/src/index.ts', [ 'hello', 'world' ], inject);
     await launcher.execute(true);
 
     t.deepEqual(inject.child?.options,      { stdio: 'inherit' });
