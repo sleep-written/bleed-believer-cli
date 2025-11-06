@@ -29,22 +29,12 @@ If you don't have a `tsconfig.json` file in cwd, the `@bleed-believer/cli` will 
 ```
 
 ## CLI Commands
--   `npx bleed start <target>`  
+-   `npx bleed start [target]`  
     Run a TypeScript file using the custom ESM loader.
+    -   `[target]`: The file do you want to execute.
+    -   `--watch` _(optional)_: Execute as watch mode.
+    -   `--` _(optional)_: Pass arguments to the typescript file.
 
--   `npx bleed watch <target>`  
-    Same as `start`, but watches file changes.
-
--   `npx bleed build [--config path/to/tsconfig.json]`  
+-   `npx bleed build`  
     Transpile all files to JavaScript (like `tsc`, but faster).
-
-## Flags
-
--   Use `--` to pass arguments to your script:
-    ```bash
-    bleed start ./src/index.ts -- --env=dev --debug
-
--   Use `--config` or `-c` to set custom tsconfig:
-    ```shell
-    bleed build --config tsconfig.prod.json
-    ```
+    -   `--config` _(optional)_: Sets a custom tsconfig JSON file.

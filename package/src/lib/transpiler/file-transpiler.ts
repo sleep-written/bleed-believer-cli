@@ -1,4 +1,4 @@
-import type { TranspilerInject } from './interfaces/index.js';
+import type { FileTranspilerInject } from './interfaces/index.js';
 import type { Config, Options } from '@swc/core';
 import type { TSConfig } from '@lib/ts-config/index.js';
 
@@ -8,12 +8,12 @@ import { transform } from '@swc/core';
 
 export class FileTranspiler {
     #config: Config;
-    #inject: Required<TranspilerInject>;
+    #inject: Required<FileTranspilerInject>;
 
     #outDir: string;
     #rootDir: string;
 
-    constructor(tsConfig: TSConfig, inject?: TranspilerInject) {
+    constructor(tsConfig: TSConfig, inject?: FileTranspilerInject) {
         this.#config = tsConfig.toSWC();
         this.#inject = {
             process:    inject?.process                 ?? process,

@@ -1,4 +1,4 @@
-import type { TranspilerInject } from './interfaces/index.js';
+import type { FileTranspilerInject } from './interfaces/index.js';
 import type { Options, Output } from '@swc/core';
 
 import { FileTranspiler } from './file-transpiler.js';
@@ -6,7 +6,7 @@ import { TSConfig } from '@lib/ts-config/ts-config.js';
 import { join } from 'path';
 import test from 'ava';
 
-class TranspilerInjectorFactory implements TranspilerInject {
+class TranspilerInjectorFactory implements FileTranspilerInject {
     filesystem: Record<string, any> = {};
 
     process = {
