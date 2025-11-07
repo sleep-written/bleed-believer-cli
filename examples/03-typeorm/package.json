@@ -1,0 +1,15 @@
+{
+  "type": "module",
+  "scripts": {
+    "typeorm": "bleed start ./node_modules/typeorm/cli.js --"
+  },
+  "devDependencies": {
+    "@bleed-believer/cli": "file:../../package",
+    "@types/node": "^24.10.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.27"
+  }
+}

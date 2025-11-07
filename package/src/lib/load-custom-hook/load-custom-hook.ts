@@ -16,7 +16,16 @@ export class LoadCustomHook {
             transform:  inject?.transform ?? transform
         };
 
+        /**
+         * Removing "baseUrl" and "paths" from "jsc" it's required
+         * because in some escenarios (I SEE YOU TYPEORM) the resolved
+         * alias by SWC is wrong. The problem only occurs in load hook
+         * and not when you transpile the whole project, kek.
+         */
         this.#swcOptions = tsConfig.toSWC();
+        delete this.#swcOptions?.jsc?.baseUrl;
+        delete this.#swcOptions?.jsc?.paths;
+
         if (this.#swcOptions.sourceMaps) {
             this.#swcOptions.sourceMaps = 'inline';
             this.#swcOptions.inlineSourcesContent = false;

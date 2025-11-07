@@ -21,7 +21,7 @@
       "@/*": [ "./*" ]
     }
   },
-  "sourceMaps": false,
+  "sourceMaps": true,
   "exclude": [
     ".fake.ts",
     ".mock.ts",
