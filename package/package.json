@@ -24,8 +24,11 @@
     "bleed": "./dist/cli.js"
   },
   "scripts": {
-    "test": "node --run clean && swc ./src -d ./dist --strip-leading-paths && tsc && ava",
-    "build": "node --run clean && swc ./src -d ./dist --strip-leading-paths --config-file .build.swcrc && tsc -p tsconfig.build.json",
+    "build:map": "bleed build",
+    "build:swc": "bleed build --config ./tsconfig.build.json",
+    "build:tsc": "tsc -p tsconfig.build.json",
+    "build": "node --run clean && node --run build:swc && node --run build:tsc && ava",
+    "test": "node --run clean && node --run build:map && ava",
     "clean": "rm -rf ./dist",
     "check": "tsc --noEmit",
     "prepare": "node --run test && node --run build"
@@ -60,7 +63,7 @@
   },
   "homepage": "https://github.com/sleep-written/bleed-believer-cli#readme",
   "devDependencies": {
-    "@swc/cli": "^0.7.9",
+    "@bleed-believer/cli": "^0.0.1",
     "@types/node": "^24.9.2",
     "@types/yargs": "^17.0.34",
     "ava": "^6.4.1",

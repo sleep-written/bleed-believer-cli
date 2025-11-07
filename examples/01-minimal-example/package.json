@@ -1,4 +1,7 @@
 {
+    "scripts": {
+        "clean": "rm -rf ./*.mjs"
+    },
     "devDependencies": {
         "ava": "^6.4.1",
         "typescript": "^5.9.3",

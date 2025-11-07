@@ -38,3 +38,27 @@ If you don't have a `tsconfig.json` file in cwd, the `@bleed-believer/cli` will 
 -   `npx bleed build`  
     Transpile all files to JavaScript (like `tsc`, but faster).
     -   `--config` _(optional)_: Sets a custom tsconfig JSON file.
+
+## Using custom loader
+If you want to execute your file with node and `@bleed-believer/cli` as loader:
+```shell
+node --import @bleed-believer/cli ./src/index.ts
+```
+
+## Using with AVA
+Create the file `ava.config.mjs` in the root folder, with this content:
+```ts
+export default {
+  files: [
+        './src/**/*.test.ts',
+        './src/**/*.test.mts',
+  ],
+  extensions: {
+        ts: 'module',
+        mts: 'module',
+        },
+  nodeArguments: [
+        '--import=@bleed-believer/cli'
+    ]
+}
+```

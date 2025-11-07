@@ -1,4 +1,4 @@
-# Minimal example
+# TypeORM
 -   Install dependencies:
     ```shell
     npm ci
@@ -6,20 +6,20 @@
 
 -   Execute source code:
     ```shell
-    npx bleed start ./index.mts
+    npx bleed start ./src/index.ts
     ```
 
 -   Execute source code in watch mode:
     ```shell
-    npx bleed start ./index.mts --watch
+    npx bleed start ./src/index.ts --watch
     ```
 
 -   Execute source code passing arguments:
     ```shell
-    npx bleed start ./index.mts -- hello world --foo bar
+    npx bleed start ./src/index.ts -- hello world --foo bar
     ```
 
 -   Transpile files:
     ```shell
-    npx bleed build
+    npx bleed build --config ./tsconfig.build.json
     ```
