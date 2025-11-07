@@ -1,12 +1,13 @@
 {
   "name": "@bleed-believer/cli",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A ts-node replacement with path alias resolution and SWC under the hood",
   "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "banner.txt"
   ],
   "exports": {
     ".": {
@@ -59,14 +60,15 @@
   },
   "homepage": "https://github.com/sleep-written/bleed-believer-cli#readme",
   "devDependencies": {
+    "@swc/cli": "^0.7.9",
     "@types/node": "^24.9.2",
     "@types/yargs": "^17.0.34",
     "ava": "^6.4.1",
+    "bleed-npm": "npm:@bleed-believer/cli@^0.0.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@swc/cli": "^0.7.8",
-    "@swc/core": "^1.14.0",
+    "@swc/core": "^1.15.0",
     "chalk": "^5.6.2",
     "json5": "^2.2.3",
     "tslog": "^4.10.2",

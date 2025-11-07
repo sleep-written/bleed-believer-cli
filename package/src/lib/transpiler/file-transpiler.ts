@@ -44,6 +44,7 @@ export class FileTranspiler {
     async transpile(file: { name: string; parentPath: string }): Promise<void> {
         const options: Options = structuredClone(this.#config);
         options.filename = resolve(file.parentPath, file.name);
+        delete options.exclude;
 
         const paths = this.#outputPaths(file);
         const source = await this.#inject.readFile(options.filename, 'utf-8');

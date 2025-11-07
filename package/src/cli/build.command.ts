@@ -15,7 +15,7 @@ export const buildCommand: CommandModule<{}, Argv> = {
     builder:    yargs => yargs
         .options('config', {
             string: true,
-            description: 'The custom "tsconfig.json" do you want to use',
+            description: 'The custom "tsconfig.json" do you want to use'
         })
         // .options('watch', {
         //     boolean: true,
@@ -27,6 +27,6 @@ export const buildCommand: CommandModule<{}, Argv> = {
     handler: async argv => {
         const tsConfig = await TSConfig.load(argv.config);
         const transpiler = new Transpiler(tsConfig);
-        return transpiler.watch()
+        return transpiler.build();
     }
 }

@@ -6,6 +6,7 @@
   "devDependencies": {
     "@bleed-believer/cli": "file:../../package",
     "@types/node": "^24.10.0",
+    "ava": "^6.4.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
