@@ -1,6 +1,6 @@
-import { rm } from 'fs/promises';
 import { dataSource } from './data-source.js';
 import { User } from '@entities/user.entity.js';
+import { rm } from 'fs/promises';
 
 await dataSource.initialize();
 await dataSource.runMigrations();

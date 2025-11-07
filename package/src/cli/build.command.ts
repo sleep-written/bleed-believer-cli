@@ -5,6 +5,7 @@ import { TSConfig } from '@lib/ts-config/ts-config.js';
 
 interface Argv {
     config?: string;
+    // watch?: boolean;
     '--'?: string[];
 }
 
@@ -16,12 +17,16 @@ export const buildCommand: CommandModule<{}, Argv> = {
             string: true,
             description: 'The custom "tsconfig.json" do you want to use',
         })
+        // .options('watch', {
+        //     boolean: true,
+        //     description: 'Activate "watch" mode'
+        // })
         .parserConfiguration({
             "populate--": true
         }),
     handler: async argv => {
         const tsConfig = await TSConfig.load(argv.config);
         const transpiler = new Transpiler(tsConfig);
-        return transpiler.build();
+        return transpiler.watch()
     }
 }
