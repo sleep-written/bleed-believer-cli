@@ -1,6 +1,6 @@
 {
   "name": "@bleed-believer/cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A ts-node replacement with path alias resolution and SWC under the hood",
   "type": "module",
   "module": "./dist/index.js",
@@ -28,7 +28,7 @@
     "build:swc": "bleed build --config ./tsconfig.build.json",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build": "node --run clean && node --run build:swc && node --run build:tsc",
-    "test":  "node --run clean && node --run build:map && ava",
+    "test": "node --run clean && node --run build:map && ava",
     "clean": "rm -rf ./dist",
     "check": "tsc --noEmit",
     "prepare": "node --run test && node --run build"
