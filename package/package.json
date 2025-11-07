@@ -27,8 +27,8 @@
     "build:map": "bleed build",
     "build:swc": "bleed build --config ./tsconfig.build.json",
     "build:tsc": "tsc -p tsconfig.build.json",
-    "build": "node --run clean && node --run build:swc && node --run build:tsc && ava",
-    "test": "node --run clean && node --run build:map && ava",
+    "build": "node --run clean && node --run build:swc && node --run build:tsc",
+    "test":  "node --run clean && node --run build:map && ava",
     "clean": "rm -rf ./dist",
     "check": "tsc --noEmit",
     "prepare": "node --run test && node --run build"
