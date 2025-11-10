@@ -23,8 +23,9 @@ export const startCommand: CommandModule<{}, Argv> = {
         .parserConfiguration({
             "populate--": true
         }),
-    handler: argv => {
+    handler: async argv => {
         const launcher = new Launcher(argv.target, argv['--']);
-        return launcher.execute(argv.watch);
+        await launcher.execute(argv.watch);
+        process.exit(0);
     }
 }

@@ -27,6 +27,7 @@ export const buildCommand: CommandModule<{}, Argv> = {
     handler: async argv => {
         const tsConfig = await TSConfig.load(argv.config);
         const transpiler = new Transpiler(tsConfig);
-        return transpiler.build();
+        await transpiler.build();
+        process.exit(0);
     }
 }
