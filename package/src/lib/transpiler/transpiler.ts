@@ -59,37 +59,6 @@ export class Transpiler {
     }
     
     async watch(inject?: FileTranspilerInject): Promise<void> {
-        const tsConfig = this.#tsConfig.value;
-        const rootDir = resolve(tsConfig.compilerOptions?.rootDir ?? '.');
-        const options: WatchOptions = {};
-
-        await this.build(inject);
-        return new Promise<void>((resolve, reject) => {
-            let task: Promise<void> | null = null;
-            const watcher = this.#inject.watch(rootDir, options, () => {});
-
-            watcher.once('close',  () => resolve());
-            watcher.once('error',  er => reject(er));
-            watcher.on('change', (e, name) => {
-                // if (!/\.m?ts/.test(name)) {
-                //     return;
-                // }
-                
-                if (!task) {
-                    console.log('event:', e);
-                    console.log('file: ', name);
-                    console.log();
-                    task = this
-                        .build(inject)
-                        .then(() => { task = null })
-                        .then(() => {
-                            console.log();
-                            console.log(chalk.blue('Waiting for file changes...'));
-                        });
-                }
-            });
-
-            this.#inject.process.once('SIGINT', () => watcher.close());
-        });
+        throw new Error('Not implemented yet');
     }
 }
