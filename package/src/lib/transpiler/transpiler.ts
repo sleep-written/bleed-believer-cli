@@ -1,13 +1,12 @@
 import type { FileTranspilerInject, TranspilerInject } from './interfaces/index.js';
-import type { Dirent, WatchOptions } from 'fs';
 import type { TSConfig } from '@lib/ts-config/index.js';
+import type { Dirent } from 'fs';
 
 import { FileTranspiler } from './file-transpiler.js';
 import { join, resolve } from 'path';
 import { logger } from '@/logger.js';
 import { watch } from 'fs';
 import { glob } from 'fs/promises';
-import chalk from 'chalk';
 
 export class Transpiler {
     #tsConfig: TSConfig;
@@ -59,37 +58,6 @@ export class Transpiler {
     }
     
     async watch(inject?: FileTranspilerInject): Promise<void> {
-        const tsConfig = this.#tsConfig.value;
-        const rootDir = resolve(tsConfig.compilerOptions?.rootDir ?? '.');
-        const options: WatchOptions = {};
-
-        await this.build(inject);
-        return new Promise<void>((resolve, reject) => {
-            let task: Promise<void> | null = null;
-            const watcher = this.#inject.watch(rootDir, options, () => {});
-
-            watcher.once('close',  () => resolve());
-            watcher.once('error',  er => reject(er));
-            watcher.on('change', (e, name) => {
-                // if (!/\.m?ts/.test(name)) {
-                //     return;
-                // }
-                
-                if (!task) {
-                    console.log('event:', e);
-                    console.log('file: ', name);
-                    console.log();
-                    task = this
-                        .build(inject)
-                        .then(() => { task = null })
-                        .then(() => {
-                            console.log();
-                            console.log(chalk.blue('Waiting for file changes...'));
-                        });
-                }
-            });
-
-            this.#inject.process.once('SIGINT', () => watcher.close());
-        });
+        throw new Error('Not implemented yet');
     }
 }
