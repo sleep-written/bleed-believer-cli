@@ -1,9 +1,0 @@
-{
-  "type": "module",
-  "dependencies": {
-    "@bleed-believer/cli": "file:../../package"
-  },
-  "devDependencies": {
-    "@types/node": "^24.9.1"
-  }
-}

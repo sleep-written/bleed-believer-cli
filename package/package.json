@@ -3,35 +3,23 @@
   "version": "0.1.1",
   "description": "A ts-node replacement with path alias resolution and SWC under the hood",
   "type": "module",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "module": "./src/index.ts",
   "files": [
     "dist",
     "banner.txt"
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.js"
+      "import": "./src/index.ts"
     }
   },
   "bin": {
-    "@bleed-believer/path-alias": "./dist/cli.js",
-    "bleed": "./dist/cli.js"
+    "@bleed-believer/path-alias": "./src/cli.ts",
+    "bleed": "./src/cli.ts"
   },
   "scripts": {
-    "build:tsc": "tsc -p tsconfig.build.json",
-    "build:swc-src": "swc ./src -d ./dist --strip-leading-paths",
-    "build:swc-dist": "swc ./src -d ./dist --strip-leading-paths --config-file .build.swcrc",
-    "test": "node --run clean && node --run build:swc-src  && node --run build:tsc && ava",
-    "build": "node --run clean && node --run build:swc-dist && node --run build:tsc",
-    "clean": "rm -rf ./dist",
-    "check": "tsc --noEmit",
-    "prepare": "node --run check && node --run test && node --run build"
+    "test": "node --test",
+    "check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -63,14 +51,13 @@
   },
   "homepage": "https://github.com/sleep-written/bleed-believer-cli#readme",
   "devDependencies": {
-    "@swc/cli": "^0.7.9",
-    "@types/node": "^24.10.0",
-    "@types/yargs": "^17.0.34",
-    "ava": "^6.4.1",
+    "@swc/cli": "^0.8.0",
+    "@types/node": "^25.4.0",
+    "@types/yargs": "^17.0.35",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@swc/core": "^1.15.1",
+    "@swc/core": "^1.15.18",
     "chalk": "^5.6.2",
     "json5": "^2.2.3",
     "tslog": "^4.10.2",
