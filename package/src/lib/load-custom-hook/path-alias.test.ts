@@ -1,8 +1,8 @@
-import { AliasResolver } from './alias-resolver.ts';
+import { PathAlias } from './path-alias.ts';
 import test from 'node:test';
 
 test('Resolve "@lib/pendejo.ts" (win32)', (t: test.TestContext) => {
-    const resolver = new AliasResolver(
+    const resolver = new PathAlias(
         {
             path: 'C:\\path\\to\\project\\tsconfig.json',
             compilerOptions: {
@@ -22,7 +22,7 @@ test('Resolve "@lib/pendejo.ts" (win32)', (t: test.TestContext) => {
 });
 
 test('Resolve "@lib/pendejo.ts" (win32, nested)', (t: test.TestContext) => {
-    const resolver = new AliasResolver(
+    const resolver = new PathAlias(
         {
             extends: [
                 {
@@ -50,7 +50,7 @@ test('Resolve "@lib/pendejo.ts" (win32, nested)', (t: test.TestContext) => {
 });
 
 test('Resolve "@lib/pendejo.ts" (linux)', (t: test.TestContext) => {
-    const resolver = new AliasResolver(
+    const resolver = new PathAlias(
         {
             path: '/path/to/project/tsconfig.json',
             compilerOptions: {
@@ -70,7 +70,7 @@ test('Resolve "@lib/pendejo.ts" (linux)', (t: test.TestContext) => {
 });
 
 test('Resolve "@lib/pendejo.ts" (linux, nested)', (t: test.TestContext) => {
-    const resolver = new AliasResolver(
+    const resolver = new PathAlias(
         {
             extends: [
                 {
@@ -98,7 +98,7 @@ test('Resolve "@lib/pendejo.ts" (linux, nested)', (t: test.TestContext) => {
 });
 
 test('Resolve "@lil/pendejo.ts" (null)', (t: test.TestContext) => {
-    const resolver = new AliasResolver(
+    const resolver = new PathAlias(
         {
             extends: [
                 {

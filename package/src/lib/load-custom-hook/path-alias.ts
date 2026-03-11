@@ -1,7 +1,7 @@
-import { posix } from 'node:path';
 import type { TsconfigObject } from './interfaces/index.ts';
+import { posix } from 'node:path';
 
-export class AliasResolver {
+export class PathAlias {
     #tsconfig: TsconfigObject;
 
     constructor(tsconfig: TsconfigObject) {
