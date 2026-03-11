@@ -2,7 +2,7 @@ import type { ResolveFnOutput, ResolveHookContext, ResolveHook } from 'node:modu
 import type { ResolveCustomHookInject } from './interfaces/index.ts';
 
 import { fileURLToPath } from 'node:url';
-import { PathAlias } from './path-alias.ts';
+import { PathAlias } from '../path-alias/index.ts';
 import { access } from 'node:fs/promises';
 
 export class ResolveCustomHook {
