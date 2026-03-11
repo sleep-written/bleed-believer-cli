@@ -69,6 +69,10 @@ export function parseCompilerOptions(o: any): CompilerOptions {
             out.sourceMap = raw.sourceMap;
         }
 
+        if (typeof raw.removeComments === 'boolean') {
+            out.removeComments = raw.removeComments;
+        }
+
         if (typeof raw.emitDeclarationOnly === 'boolean') {
             out.emitDeclarationOnly = raw.emitDeclarationOnly;
         }

@@ -1,0 +1,1 @@
+export type { TsconfigObject } from './tsconfig.object.ts';

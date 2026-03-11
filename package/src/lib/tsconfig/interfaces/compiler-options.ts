@@ -10,6 +10,7 @@ export interface CompilerOptions {
     strict?: boolean;
     noEmit?: boolean;
     sourceMap?: boolean;
+    removeComments?: boolean;
     emitDeclarationOnly?: boolean;
     verbatimModuleSyntax?: boolean;
     emitDecoratorMetadata?: boolean;
