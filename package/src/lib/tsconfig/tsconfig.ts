@@ -1,89 +1,83 @@
-import type { CompilerOptions, TsconfigLoadInject } from './interfaces/index.ts';
+import type { TsconfigJSON, TsconfigInject } from './interfaces/index.ts';
 
-import { parseCompilerOptions } from './parse-compiler-options.ts';
-import { dirname, isAbsolute, resolve } from 'node:path';
-import { readFile } from 'node:fs/promises';
-import json5 from 'json5';
+import { loadTsconfigJSON } from './load-tsconfig-json.ts';
+import { dirname, resolve } from 'node:path';
+import { isBuiltin } from 'node:module';
 
 export class Tsconfig {
-    static async load(
-        path: string,
-        inject?: TsconfigLoadInject
-    ): Promise<Tsconfig> {
-        const injected: Required<TsconfigLoadInject> = {
-            isAbsolute: inject?.isAbsolute?.bind(inject)    ?? isAbsolute,
-            readFile:   inject?.readFile?.bind(inject)      ?? readFile,
-            resolve:    inject?.resolve?.bind(inject)       ?? resolve,
-            process:    inject?.process ?? process
-        }
-
-        const cwd = injected.process.cwd()
-        if (!injected.isAbsolute(path)) {
-            path = injected.resolve(cwd, path);
-        }
-
-        if (!/\.json$/i.test(path)) {
-            path = injected.resolve(path, 'tsconfig.json');
-        }
-
-        const tsconfig = new Tsconfig(path);
-        const text = await injected.readFile(path, 'utf-8');
-        const json = json5.parse(text);
-
-        if (typeof json.extends === 'string') {
-            json.extends = [ json.extends ];
-        }
-
-        if (json.extends instanceof Array) {
-            tsconfig.#extends = [];
-            for (const innerPath of json.extends) {
-                const innerFullPath = injected.resolve(cwd, dirname(path), innerPath);
-                const innerTsconfig = await Tsconfig.load(innerFullPath, inject);
-                tsconfig.#extends.push(innerTsconfig);
-            }
-        }
-
-        if (json.compilerOptions) {
-            tsconfig.#compilerOptions = parseCompilerOptions(json.compilerOptions);
-        }
-
-        if (json.include instanceof Array) {
-            tsconfig.#include = json.include.filter((x: any) => typeof x === 'string');
-        }
-        
-        if (json.exclude instanceof Array) {
-            tsconfig.#exclude = json.exclude.filter((x: any) => typeof x === 'string');
-        }
-
-        return tsconfig;
+    static async load(path: string): Promise<Tsconfig> {
+        const out = await loadTsconfigJSON(path);
+        return new Tsconfig(path, out);
     }
+
+    #injected: Required<TsconfigInject>;
 
     #path: string;
     get path(): string {
         return this.#path;
     }
 
-    #extends?: Tsconfig[];
-    get extends(): Tsconfig[] | undefined {
-        return this.#extends;
+    #json: TsconfigJSON;
+    get json(): TsconfigJSON {
+        return this.#json;
     }
 
-    #include?: string[];
-    get include(): string[] | undefined {
-        return this.#include;
-    }
-
-    #exclude?: string[];
-    get exclude(): string[] | undefined {
-        return this.#exclude;
-    }
-
-    #compilerOptions?: CompilerOptions;
-    get compilerOptions(): CompilerOptions | undefined {
-        return this.#compilerOptions;
-    }
-
-    constructor(path: string) {
+    constructor(
+        path: string,
+        json: TsconfigJSON,
+        inject?: TsconfigInject
+    ) {
         this.#path = path;
+        this.#json = json;
+        this.#injected = {
+            dirname:    inject?.dirname?.bind(inject)   ?? dirname,
+            resolve:    inject?.resolve?.bind(inject)   ?? resolve,
+        };
+    }
+
+    resolve(specifier: string): string[] | null {
+        if (isBuiltin(specifier)) {
+            return null;
+        }
+
+        const paths = this.#json.compilerOptions?.paths;
+        if (!paths) {
+            return null;
+        }
+
+        const basePath = this.#injected.resolve(
+            this.#injected.dirname(this.#path),
+            this.#json.compilerOptions?.baseUrl ?? '.'
+        );
+
+        for (const [ k, v ] of Object.entries(paths)) {
+            const testPattern = new RegExp(
+                k
+                    .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+                    .replace(/\\\*/g, '.+')
+                    .replace(/^/, '^')
+                    .replace(/$/, '$')
+            );
+
+            if (testPattern.test(specifier)) {
+                const replacePattern = new RegExp(
+                    k
+                        .replace(/\*.*$/, '')
+                        .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+                        .replace(/^/, '^')
+                );
+
+                return v.map(path => this.#injected.resolve(
+                        basePath,
+                        specifier.replace(
+                            replacePattern,
+                            path.replace(/\*/, '')
+                        )
+                    )
+                )
+            }
+        }
+
+        return null;
     }
 }

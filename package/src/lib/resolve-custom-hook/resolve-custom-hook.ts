@@ -1,17 +1,16 @@
 import type { ResolveFnOutput, ResolveHookContext, ResolveHook } from 'node:module';
-import type { ResolveCustomHookInject } from './interfaces/index.ts';
+import type { ResolveCustomHookInject, TsconfigObject } from './interfaces/index.ts';
 
-import { fileURLToPath } from 'node:url';
-import { PathAlias } from '../path-alias/index.ts';
+import { pathToFileURL } from 'node:url';
 import { access } from 'node:fs/promises';
 
 export class ResolveCustomHook {
-    #pathAlias: PathAlias;
+    #tsconfig: TsconfigObject;
     #injected: Required<ResolveCustomHookInject>;
     #cache = new Map<string, string>();
 
-    constructor(pathAlias: PathAlias, inject?: ResolveCustomHookInject) {
-        this.#pathAlias = pathAlias;
+    constructor(tsconfig: TsconfigObject, inject?: ResolveCustomHookInject) {
+        this.#tsconfig = tsconfig;
         this.#injected = {
             access: access?.bind(inject)    ?? inject
         };
@@ -27,13 +26,12 @@ export class ResolveCustomHook {
             return defaultLoad(spec, context);
         }
 
-        const urls = this.#pathAlias.resolve(specifier);
-        if (urls) {
-            for (const url of urls) {
+        const paths = this.#tsconfig.resolve(specifier);
+        if (paths) {
+            for (const path of paths) {
                 try {
-                    const path = fileURLToPath(url);
                     await this.#injected.access(path);
-
+                    const url = pathToFileURL(path).href;
                     this.#cache.set(specifier, url);
                     return defaultLoad(url, context);
                 } catch {
