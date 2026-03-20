@@ -1,9 +1,14 @@
 import type { LoadFnOutput, LoadHook, LoadHookContext } from 'node:module';
 import type { TsconfigObject } from './interfaces/index.ts';
-import type { Config } from '@swc/core';
+import type { Options } from '@swc/core';
+
+import { fileURLToPath } from 'node:url';
+import { transform } from '@swc/core';
+import { readFile } from 'node:fs/promises';
 
 export class LoadCustomHook {
-    #swcSettings: Config;
+    #swcSettings: Options;
+    #cache = new Map<string, string>();
 
     constructor(tsconfig: TsconfigObject) {
         this.#swcSettings = tsconfig.toSwcConfig();
@@ -14,9 +19,37 @@ export class LoadCustomHook {
         context: LoadHookContext,
         defaultLoad: Parameters<LoadHook>[2]
     ): Promise<LoadFnOutput> {
-        console.log('url:', url);
-        console.log('ctx:', context);
-        console.log();
-        return defaultLoad(url, context);
+        switch (context.format) {
+            case 'module-typescript': {
+                if (this.#cache.has(url)) {
+                    return {
+                        shortCircuit: true,
+                        format: 'module',
+                        source: this.#cache.get(url),
+                    };
+                }
+
+                const path = fileURLToPath(url);
+                const text = await readFile(path, 'utf-8');
+                const conf = structuredClone(this.#swcSettings);
+                conf.sourceFileName = path;
+                conf.filename = path;
+                if (conf.sourceMaps) {
+                    conf.sourceMaps = 'inline';
+                }
+
+                const { code } = await transform(text, conf);
+                this.#cache.set(url, code);
+                return {
+                    shortCircuit: true,
+                    format: 'module',
+                    source: code,
+                };
+            }
+
+            default: {
+                return defaultLoad(url, context);
+            }
+        }
     }
 }
