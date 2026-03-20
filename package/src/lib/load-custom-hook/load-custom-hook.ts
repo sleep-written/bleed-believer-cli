@@ -5,13 +5,16 @@ import type { Options } from '@swc/core';
 import { fileURLToPath } from 'node:url';
 import { transform } from '@swc/core';
 import { readFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 
 export class LoadCustomHook {
     #swcSettings: Options;
     #cache = new Map<string, string>();
+    #cwd: string;
 
     constructor(tsconfig: TsconfigObject) {
         this.#swcSettings = tsconfig.toSwcConfig();
+        this.#cwd = dirname(tsconfig.path);
     }
 
     async load(
@@ -36,6 +39,13 @@ export class LoadCustomHook {
                 conf.filename = path;
                 if (conf.sourceMaps) {
                     conf.sourceMaps = 'inline';
+                }
+
+                if (typeof conf.jsc?.baseUrl === 'string') {
+                    conf.jsc.baseUrl = resolve(
+                        this.#cwd,
+                        conf.jsc.baseUrl
+                    );
                 }
 
                 const { code } = await transform(text, conf);
