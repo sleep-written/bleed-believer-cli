@@ -1,8 +1,5 @@
-import type { CompilerOptions } from '../../tsconfig/index.ts';
+import type { Config } from '@swc/core';
 
 export interface TsconfigObject {
-    extends?: TsconfigObject[];
-    include?: string[];
-    exclude?: string[];
-    compilerOptions?: CompilerOptions;
+    toSwcConfig(): Config;
 }

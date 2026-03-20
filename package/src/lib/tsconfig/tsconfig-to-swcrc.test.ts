@@ -1,9 +1,10 @@
-import type { TsconfigObject } from './interfaces/index.ts';
+import type { TsconfigJSON } from './interfaces/index.ts';
+
 import { tsconfigToSwcrc } from './tsconfig-to-swcrc.ts';
 import test from 'node:test';
 
 test('Load a simple configuration', (t: test.TestContext) => {
-    const tsconfig: TsconfigObject = {
+    const tsconfig: TsconfigJSON = {
         compilerOptions: {
             target: 'es2024',
             module: 'node20'
@@ -31,27 +32,14 @@ test('Load a simple configuration', (t: test.TestContext) => {
 });
 
 test('Load a simple configuration', (t: test.TestContext) => {
-    const tsconfig: TsconfigObject = {
-        extends: [
-            {
-                extends: [
-                    {
-                        compilerOptions: {
-                            target: 'es2024',
-                            module: 'node20',
-                            emitDecoratorMetadata: true,
-                            experimentalDecorators: true
-                        }
-                    }
-                ],
-                compilerOptions: {
-                    outDir: 'dist',
-                    rootDir: 'src',
-                    sourceMap: true
-                }
-            }
-        ],
+    const tsconfig: TsconfigJSON = {
         compilerOptions: {
+            target: 'es2024',
+            module: 'node20',
+            emitDecoratorMetadata: true,
+            experimentalDecorators: true,
+            outDir: 'dist',
+            rootDir: 'src',
             sourceMap: false
         }
     };

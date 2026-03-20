@@ -1,19 +1,12 @@
 import type { LoadFnOutput, LoadHook, LoadHookContext } from 'node:module';
-import type { TsconfigObject, TranspilerInject } from './interfaces/index.ts';
-import type { Config, Options, Output } from '@swc/core';
-
-import { tsconfigToSwcrc } from './tsconfig-to-swcrc.ts';
-import { transform } from '@swc/core';
+import type { TsconfigObject } from './interfaces/index.ts';
+import type { Config } from '@swc/core';
 
 export class LoadCustomHook {
     #swcSettings: Config;
-    #injected: Required<TranspilerInject>;
 
-    constructor(tsconfig: TsconfigObject, inject?: TranspilerInject) {
-        this.#swcSettings = tsconfigToSwcrc(tsconfig);
-        this.#injected = {
-            transform:  inject?.transform?.bind(inject) ?? transform
-        };
+    constructor(tsconfig: TsconfigObject) {
+        this.#swcSettings = tsconfig.toSwcConfig();
     }
 
     async load(
@@ -21,6 +14,9 @@ export class LoadCustomHook {
         context: LoadHookContext,
         defaultLoad: Parameters<LoadHook>[2]
     ): Promise<LoadFnOutput> {
+        console.log('url:', url);
+        console.log('ctx:', context);
+        console.log();
         return defaultLoad(url, context);
     }
 }

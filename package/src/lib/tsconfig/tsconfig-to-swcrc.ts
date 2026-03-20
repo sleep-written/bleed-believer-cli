@@ -1,17 +1,8 @@
 import type { Config, JscConfig, ModuleConfig } from '@swc/core';
-import type { CompilerOptions } from '../tsconfig/index.ts';
-import type { TsconfigObject } from './interfaces/index.ts';
+import type { TsconfigJSON } from './interfaces/index.ts';
 
-function resolveCompilerOptions(input: TsconfigObject): CompilerOptions {
-    let merged: CompilerOptions = {};
-    for (const ext of input.extends ?? []) {
-        merged = { ...merged, ...resolveCompilerOptions(ext) };
-    }
-    return { ...merged, ...input.compilerOptions };
-}
-
-export function tsconfigToSwcrc(input: TsconfigObject): Config {
-    const compilerOptions = resolveCompilerOptions(input);
+export function tsconfigToSwcrc(input: TsconfigJSON): Config {
+    const compilerOptions = input.compilerOptions ?? {};
     let module: ModuleConfig;
     switch (compilerOptions.module) {
         case 'nodenext': {

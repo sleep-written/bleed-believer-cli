@@ -1,8 +1,11 @@
 import type { TsconfigJSON, TsconfigInject } from './interfaces/index.ts';
+import type { Config } from '@swc/core';
 
-import { loadTsconfigJSON } from './load-tsconfig-json.ts';
 import { dirname, resolve } from 'node:path';
 import { isBuiltin } from 'node:module';
+
+import { loadTsconfigJSON } from './load-tsconfig-json.ts';
+import { tsconfigToSwcrc } from './tsconfig-to-swcrc.ts';
 
 export class Tsconfig {
     static async load(path: string): Promise<Tsconfig> {
@@ -79,5 +82,9 @@ export class Tsconfig {
         }
 
         return null;
+    }
+
+    toSwcConfig(): Config {
+        return tsconfigToSwcrc(this.#json);
     }
 }

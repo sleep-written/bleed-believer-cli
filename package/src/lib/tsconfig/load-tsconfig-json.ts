@@ -1,6 +1,7 @@
 import type {
     TsconfigJSON, CompilerOptionsTarget, CompilerOptionsModule,
-    CompilerOptionsModuleResolution
+    CompilerOptionsModuleResolution,
+    CompilerOptions
 } from './interfaces/index.ts';
 
 import { dirname, isAbsolute, resolve } from 'node:path';
@@ -157,53 +158,39 @@ export async function loadTsconfigJSON(path: string, inject?: LoadTsconfigJSONIn
             }
         }
 
-        if (typeof json.compilerOptions.strict === 'boolean') {
-            resp.compilerOptions.strict = json.compilerOptions.strict;
-        }
+        ([
+            'strict',
+            'noEmit',
+            'sourceMap',
+            'removeComments',
+            'emitDeclarationOnly',
+            'verbatimModuleSyntax',
+            'emitDecoratorMetadata',
+            'experimentalDecorators',
+            'allowImportingTsExtensions',
+        ] as (keyof CompilerOptions)[]).forEach(k => {
+            if (
+                resp?.compilerOptions &&
+                json?.compilerOptions &&
+                typeof json.compilerOptions[k] === 'boolean'
+            ) {
+                (resp.compilerOptions as any)[k] = json!.compilerOptions![k];
+            }
+        });
 
-        if (typeof json.compilerOptions.noEmit === 'boolean') {
-            resp.compilerOptions.noEmit = json.compilerOptions.noEmit;
-        }
-
-        if (typeof json.compilerOptions.sourceMap === 'boolean') {
-            resp.compilerOptions.sourceMap = json.compilerOptions.sourceMap;
-        }
-
-        if (typeof json.compilerOptions.removeComments === 'boolean') {
-            resp.compilerOptions.removeComments = json.compilerOptions.removeComments;
-        }
-
-        if (typeof json.compilerOptions.verbatimModuleSyntax === 'boolean') {
-            resp.compilerOptions.verbatimModuleSyntax = json.compilerOptions.verbatimModuleSyntax;
-        }
-
-        if (typeof json.compilerOptions.emitDeclarationOnly === 'boolean') {
-            resp.compilerOptions.emitDeclarationOnly = json.compilerOptions.emitDeclarationOnly;
-        }
-
-        if (typeof json.compilerOptions.emitDecoratorMetadata === 'boolean') {
-            resp.compilerOptions.emitDecoratorMetadata = json.compilerOptions.emitDecoratorMetadata;
-        }
-
-        if (typeof json.compilerOptions.experimentalDecorators === 'boolean') {
-            resp.compilerOptions.experimentalDecorators = json.compilerOptions.experimentalDecorators;
-        }
-
-        if (typeof json.compilerOptions.allowImportingTsExtensions === 'boolean') {
-            resp.compilerOptions.allowImportingTsExtensions = json.compilerOptions.allowImportingTsExtensions;
-        }
-
-        if (typeof json.compilerOptions.outDir === 'string') {
-            resp.compilerOptions.outDir = json.compilerOptions.outDir;
-        }
-
-        if (typeof json.compilerOptions.rootDir === 'string') {
-            resp.compilerOptions.rootDir = json.compilerOptions.rootDir;
-        }
-
-        if (typeof json.compilerOptions.baseUrl === 'string') {
-            resp.compilerOptions.baseUrl = json.compilerOptions.baseUrl;
-        }
+        ([
+            'outDir',
+            'rootDir',
+            'baseUrl',
+        ] as (keyof CompilerOptions)[]).forEach(k => {
+            if (
+                resp?.compilerOptions &&
+                json?.compilerOptions &&
+                typeof json.compilerOptions[k] === 'string'
+            ) {
+                (resp.compilerOptions as any)[k] = json!.compilerOptions![k];
+            }
+        });
 
         if (json.compilerOptions.paths && typeof json.compilerOptions.paths === 'object') {
             const paths: Record<string, string[]> = {};
