@@ -22,44 +22,43 @@ export class LoadCustomHook {
         context: LoadHookContext,
         defaultLoad: Parameters<LoadHook>[2]
     ): Promise<LoadFnOutput> {
-        switch (context.format) {
-            case 'module-typescript': {
-                if (this.#cache.has(url)) {
-                    return {
-                        shortCircuit: true,
-                        format: 'module',
-                        source: this.#cache.get(url),
-                    };
-                }
-
-                const path = fileURLToPath(url);
-                const text = await readFile(path, 'utf-8');
-                const conf = structuredClone(this.#swcSettings);
-                conf.sourceFileName = path;
-                conf.filename = path;
-                if (conf.sourceMaps) {
-                    conf.sourceMaps = 'inline';
-                }
-
-                if (typeof conf.jsc?.baseUrl === 'string') {
-                    conf.jsc.baseUrl = resolve(
-                        this.#cwd,
-                        conf.jsc.baseUrl
-                    );
-                }
-
-                const { code } = await transform(text, conf);
-                this.#cache.set(url, code);
-                return {
-                    shortCircuit: true,
-                    format: 'module',
-                    source: code,
-                };
-            }
-
-            default: {
-                return defaultLoad(url, context);
-            }
+        if (this.#cache.has(url)) {
+            return {
+                shortCircuit: true,
+                format: 'module',
+                source: this.#cache.get(url),
+            };
         }
+
+        if (
+            /\.m?tsx?$/i.test(url) ||
+            context.format === 'module-typescript'
+        ) {
+            const path = fileURLToPath(url);
+            const text = await readFile(path, 'utf-8');
+            const conf = structuredClone(this.#swcSettings);
+            conf.sourceFileName = path;
+            conf.filename = path;
+            if (conf.sourceMaps) {
+                conf.sourceMaps = 'inline';
+            }
+
+            if (typeof conf.jsc?.baseUrl === 'string') {
+                conf.jsc.baseUrl = resolve(
+                    this.#cwd,
+                    conf.jsc.baseUrl
+                );
+            }
+
+            const { code } = await transform(text, conf);
+            this.#cache.set(url, code);
+            return {
+                shortCircuit: true,
+                format: 'module',
+                source: code,
+            };
+        }
+        
+        return defaultLoad(url, context);
     }
 }

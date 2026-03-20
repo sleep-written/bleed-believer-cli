@@ -35,7 +35,7 @@ export async function loadTsconfigJSON(path: string, inject?: LoadTsconfigJSONIn
         dirname:    inject?.dirname?.bind(inject)       ?? dirname,
     };
 
-    if (!isAbsolute(path)) {
+    if (!injected.isAbsolute(path)) {
         path = injected.resolve(path);
     }
 
