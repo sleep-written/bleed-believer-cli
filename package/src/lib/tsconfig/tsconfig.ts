@@ -88,8 +88,7 @@ export class Tsconfig {
     toSwcConfig(): Config {
         const config = tsconfigToSwcrc(this.#json);
         if (
-            typeof config.jsc &&
-            config.jsc?.baseUrl === 'string' &&
+            typeof config.jsc?.baseUrl === 'string' &&
             !this.#injected.isAbsolute(config.jsc.baseUrl)
         ) {
             config.jsc.baseUrl = this.#injected.resolve(
