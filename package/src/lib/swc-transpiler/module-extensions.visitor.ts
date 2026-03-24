@@ -2,14 +2,8 @@ import type { CallExpression, ExportAllDeclaration, ExportNamedDeclaration, Impo
 import type { Visitor } from './interfaces/index.ts';
 
 export class ModuleExtensionsVisitor implements Visitor {
-    #toJs: boolean;
-
-    constructor(toJs: boolean) {
-        this.#toJs = toJs;
-    }
-
-    #replaceExtension(value: string): string {
-        if (this.#toJs) {
+    static replaceExtension(value: string, toJs?: boolean): string {
+        if (toJs) {
             return value.replace(
                 /(?<=\.(?:m|c)?)t(?=sx?$)/i,
                 v => v === v.toUpperCase()
@@ -26,21 +20,36 @@ export class ModuleExtensionsVisitor implements Visitor {
         }
     }
 
+    #toJs: boolean;
+
+    constructor(toJs: boolean) {
+        this.#toJs = toJs;
+    }
+
     exportAllDeclaration(node: ExportAllDeclaration): void {
         if (node.source.type === 'StringLiteral') {
-            node.source.value = this.#replaceExtension(node.source.value);
+            node.source.value = ModuleExtensionsVisitor.replaceExtension(
+                node.source.value,
+                this.#toJs
+            );
         }
     }
 
     exportNamedDeclaration(node: ExportNamedDeclaration): void {
         if (node.source?.type === 'StringLiteral') {
-            node.source.value = this.#replaceExtension(node.source.value);
+            node.source.value = ModuleExtensionsVisitor.replaceExtension(
+                node.source.value,
+                this.#toJs
+            );
         }
     }
     
     importDeclaration(node: ImportDeclaration): void {
         if (node.source.type === 'StringLiteral') {
-            node.source.value = this.#replaceExtension(node.source.value);
+            node.source.value = ModuleExtensionsVisitor.replaceExtension(
+                node.source.value,
+                this.#toJs
+            );
         }
     }
 
@@ -50,7 +59,10 @@ export class ModuleExtensionsVisitor implements Visitor {
             node.arguments[0]?.expression?.type === 'StringLiteral'
         ) {
             const expression = node.arguments[0].expression;
-            expression.value = this.#replaceExtension(expression.value);
+            expression.value = ModuleExtensionsVisitor.replaceExtension(
+                expression.value,
+                this.#toJs
+            );
         }
     }
 }

@@ -48,15 +48,11 @@ export const buildCommand = CLI.createCommand(
             const options: Options = structuredClone(config);
             options.cwd = cwd;
             options.filename = resolve(file.parentPath, file.name);
-            options.outputPath = outDir + options.filename
-                .slice(rootDir.length)
-                .replace(
-                    /(?<=\.(?:m|c)?)t(?=sx?$)/i,
-                    v => v === v.toUpperCase()
-                    ?   'J'
-                    :   'j'
-                );
-                
+            options.outputPath = ModuleExtensionsVisitor.replaceExtension(
+                outDir + options.filename.slice(rootDir.length),
+                true
+            );
+
             const src = await readFile(options.filename, 'utf-8');
             const { code, map } = await transpiler.transform(src, options);
 
