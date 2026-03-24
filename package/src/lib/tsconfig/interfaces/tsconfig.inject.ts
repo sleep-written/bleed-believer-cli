@@ -6,4 +6,8 @@ export interface TsconfigInject {
     dirname?(
         path: string
     ): string;
+
+    isAbsolute?(
+        path: string
+    ): boolean;
 }

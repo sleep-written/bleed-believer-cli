@@ -1,4 +1,4 @@
-import { dirname, resolve } from 'node:path/posix';
+import { dirname, isAbsolute, resolve } from 'node:path/posix';
 import { Tsconfig } from './tsconfig.ts';
 import test from 'node:test';
 
@@ -17,7 +17,8 @@ test('Check path alias', async (t: test.TestContext) => {
         },
         {
             dirname: dirname,
-            resolve: resolve
+            resolve: resolve,
+            isAbsolute: isAbsolute
         }
     );
 
@@ -42,7 +43,8 @@ test('Check path alias with wildcard (1 result)', async (t: test.TestContext) =>
         },
         {
             dirname: dirname,
-            resolve: resolve
+            resolve: resolve,
+            isAbsolute: isAbsolute
         }
     );
 
@@ -67,7 +69,8 @@ test('Check path alias with wildcard (2 results)', async (t: test.TestContext) =
         },
         {
             dirname: dirname,
-            resolve: resolve
+            resolve: resolve,
+            isAbsolute: isAbsolute
         }
     );
 

@@ -1,7 +1,7 @@
 import type { TsconfigJSON, TsconfigInject } from './interfaces/index.ts';
 import type { Config } from '@swc/core';
 
-import { dirname, resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import { isBuiltin } from 'node:module';
 
 import { loadTsconfigJSON } from './load-tsconfig-json.ts';
@@ -33,8 +33,9 @@ export class Tsconfig {
         this.#path = path;
         this.#json = json;
         this.#injected = {
-            dirname:    inject?.dirname?.bind(inject)   ?? dirname,
-            resolve:    inject?.resolve?.bind(inject)   ?? resolve,
+            dirname:    inject?.dirname?.bind(inject)       ?? dirname,
+            resolve:    inject?.resolve?.bind(inject)       ?? resolve,
+            isAbsolute: inject?.isAbsolute?.bind(inject)    ?? isAbsolute,
         };
     }
 
@@ -85,6 +86,18 @@ export class Tsconfig {
     }
 
     toSwcConfig(): Config {
-        return tsconfigToSwcrc(this.#json);
+        const config = tsconfigToSwcrc(this.#json);
+        if (
+            typeof config.jsc &&
+            config.jsc?.baseUrl === 'string' &&
+            !this.#injected.isAbsolute(config.jsc.baseUrl)
+        ) {
+            config.jsc.baseUrl = this.#injected.resolve(
+                this.#injected.dirname(this.#path),
+                config.jsc.baseUrl
+            )
+        }
+
+        return config;
     }
 }
