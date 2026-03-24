@@ -2,5 +2,8 @@
   "type": "module",
   "dependencies": {
     "@bleed-believer/cli": "file:../package"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0"
   }
 }

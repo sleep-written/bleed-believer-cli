@@ -4,7 +4,12 @@ import { Tsconfig } from './lib/tsconfig/index.ts';
 import { LoadCustomHook } from './lib/load-custom-hook/index.ts';
 import { ResolveCustomHook } from './lib/resolve-custom-hook/index.ts';
 
-const tsconfig = await Tsconfig.load('tsconfig.json');
+const tsconfigPath = (
+    process.env['BLEED-BELIEVER-CLI-TSCONFIG'] ??
+    'tsconfig.json'
+);
+
+const tsconfig = await Tsconfig.load(tsconfigPath);
 const loadHook = new LoadCustomHook(tsconfig);
 const resolveHook = new ResolveCustomHook(tsconfig);
 

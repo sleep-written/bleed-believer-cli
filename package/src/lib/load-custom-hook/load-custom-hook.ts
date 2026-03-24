@@ -2,14 +2,16 @@ import type { LoadFnOutput, LoadHook, LoadHookContext } from 'node:module';
 import type { TsconfigObject } from './interfaces/index.ts';
 import type { Options } from '@swc/core';
 
+import { SWCTranspiler, ModuleExtensionsVisitor } from '../swc-transpiler/index.ts';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transform } from '@swc/core';
 import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
 
 export class LoadCustomHook {
     #swcSettings: Options;
-    #cache = new Map<string, string>();
+    #transpiler = new SWCTranspiler([ new ModuleExtensionsVisitor(false) ])
+    #cache = new Map<string, LoadFnOutput>();
     #cwd: string;
 
     constructor(tsconfig: TsconfigObject) {
@@ -23,17 +25,10 @@ export class LoadCustomHook {
         defaultLoad: Parameters<LoadHook>[2]
     ): Promise<LoadFnOutput> {
         if (this.#cache.has(url)) {
-            return {
-                shortCircuit: true,
-                format: 'module',
-                source: this.#cache.get(url),
-            };
+            return this.#cache.get(url)!;
         }
 
-        if (
-            /\.m?tsx?$/i.test(url) ||
-            context.format === 'module-typescript'
-        ) {
+        if (/\.(?:m|c)?tsx?$/i.test(url)) {
             const path = fileURLToPath(url);
             const text = await readFile(path, 'utf-8');
             const conf = structuredClone(this.#swcSettings);
@@ -50,15 +45,23 @@ export class LoadCustomHook {
                 );
             }
 
-            const { code } = await transform(text, conf);
-            this.#cache.set(url, code);
-            return {
-                shortCircuit: true,
-                format: 'module',
+            const { code } = await this.#transpiler.transform(text, conf);
+            const format = context.format?.startsWith('module')
+            ?   'module'
+            :   context.format?.startsWith('commonjs')
+            ?   'commonjs'
+            :   context.format;
+
+            const output: LoadFnOutput = {
+                format,
                 source: code,
+                shortCircuit: true,
             };
+
+            this.#cache.set(url, output);
+            return output;
         }
-        
+
         return defaultLoad(url, context);
     }
 }

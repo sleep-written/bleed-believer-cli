@@ -1,0 +1,1 @@
+export type { Visitor } from './visitor.ts';

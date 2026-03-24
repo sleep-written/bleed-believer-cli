@@ -31,7 +31,7 @@ test('Load a simple configuration', (t: test.TestContext) => {
     });
 });
 
-test('Load a simple configuration', (t: test.TestContext) => {
+test('Load a complex configuration', (t: test.TestContext) => {
     const tsconfig: TsconfigJSON = {
         compilerOptions: {
             target: 'es2024',

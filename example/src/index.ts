@@ -1,3 +1,5 @@
-import { sum } from '@lib/sum.ts';
+import { styleText } from 'node:util';
 
-console.log(sum(2, 2));
+const r = (await import('@lib/sum.js')).sum(2, 2);
+const t = styleText('yellow', r.toString());
+console.log('value:', t);
