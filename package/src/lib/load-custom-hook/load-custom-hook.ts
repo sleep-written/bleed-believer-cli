@@ -60,6 +60,13 @@ export class LoadCustomHook {
             return output;
         }
 
+        if (context.format === 'json') {
+            context.importAttributes = {
+                ...(context.importAttributes ?? {}),
+                type: 'json'
+            };
+        }
+
         return defaultLoad(url, context);
     }
 }

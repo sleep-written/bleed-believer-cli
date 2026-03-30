@@ -1,6 +1,9 @@
 import { styleText } from 'node:util';
 import { encode } from '@toon-format/toon';
 
+import packageJson from '../package.json' with { type: 'json' };
+console.log('package.json:', packageJson);
+
 console.log(
     'toon:',
     styleText(
