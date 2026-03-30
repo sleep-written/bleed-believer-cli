@@ -54,7 +54,14 @@ export class Tsconfig {
             this.#json.compilerOptions?.baseUrl ?? '.'
         );
 
-        for (const [ k, v ] of Object.entries(paths)) {
+        const entries = Object.entries(paths);
+
+        // Separar catch-all del resto para procesarlo último
+        const specific = entries.filter(([k]) => k !== '*');
+        const catchAll = entries.filter(([k]) => k === '*');
+        const ordered  = [...specific, ...catchAll];
+
+        for (const [k, v] of ordered) {
             const testPattern = new RegExp(
                 k
                     .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
@@ -71,14 +78,15 @@ export class Tsconfig {
                         .replace(/^/, '^')
                 );
 
-                return v.map(path => this.#injected.resolve(
+                return v.map(path =>
+                    this.#injected.resolve(
                         basePath,
                         specifier.replace(
                             replacePattern,
                             path.replace(/\*/, '')
                         )
                     )
-                )
+                );
             }
         }
 

@@ -1,5 +1,5 @@
 export interface ResolveCustomHookInject {
-    access?(
-        path: string
-    ): Promise<void>;
+    dirname?(path: string): string;
+    resolve?(...parts: string[]): string;
+    sep?: string;
 }

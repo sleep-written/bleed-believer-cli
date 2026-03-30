@@ -2,7 +2,6 @@ import type { LoadFnOutput, LoadHook, LoadHookContext } from 'node:module';
 import type { TsconfigObject } from './interfaces/index.ts';
 import type { Options } from '@swc/core';
 
-import { SWCTranspiler, ModuleExtensionsVisitor } from '../swc-transpiler/index.ts';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transform } from '@swc/core';
@@ -10,7 +9,6 @@ import { readFile } from 'node:fs/promises';
 
 export class LoadCustomHook {
     #swcSettings: Options;
-    #transpiler = new SWCTranspiler([ new ModuleExtensionsVisitor(false) ])
     #cache = new Map<string, LoadFnOutput>();
     #cwd: string;
 
@@ -45,7 +43,7 @@ export class LoadCustomHook {
                 );
             }
 
-            const { code } = await this.#transpiler.transform(text, conf);
+            const { code } = await transform(text, conf);
             const format = context.format?.startsWith('module')
             ?   'module'
             :   context.format?.startsWith('commonjs')

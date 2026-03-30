@@ -1,7 +1,8 @@
 {
   "type": "module",
   "dependencies": {
-    "@bleed-believer/cli": "file:../package"
+    "@bleed-believer/cli": "file:../package",
+    "@toon-format/toon": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0"

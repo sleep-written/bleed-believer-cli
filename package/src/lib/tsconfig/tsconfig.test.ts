@@ -28,6 +28,62 @@ test('Check path alias', async (t: test.TestContext) => {
     ]);
 });
 
+test('Check path alias without baseUrl', async (t: test.TestContext) => {
+    const tsconfig = new Tsconfig(
+        '/path/to/project/tsconfig.json',
+        {
+            compilerOptions: {
+                paths: {
+                    '@joder/*':     [ 'src/joder/*' ],
+                    '@pendejo/*':   [ 'src/pendejo-x86/*', 'src/pendejo-x64/*' ],
+                    '@data-source': [ 'src/data-source.ts' ]
+                }
+            }
+        },
+        {
+            dirname: dirname,
+            resolve: resolve,
+            isAbsolute: isAbsolute
+        }
+    );
+
+    const alias = tsconfig.resolve('@data-source');
+    t.assert.deepStrictEqual(alias, [
+        '/path/to/project/src/data-source.ts'
+    ]);
+});
+
+test('Check path alias with catch-all wildcard (baseUrl replacement)', async (t: test.TestContext) => {
+    const tsconfig = new Tsconfig(
+        '/path/to/project/tsconfig.json',
+        {
+            compilerOptions: {
+                paths: {
+                    '*':            [ 'src/*' ],        // <-- "baseUrl" replacement
+                    '@joder/*':     [ 'src/joder/*' ],
+                    '@pendejo/*':   [ 'src/pendejo-x86/*', 'src/pendejo-x64/*' ],
+                    '@data-source': [ 'src/data-source.ts' ]
+                }
+            }
+        },
+        {
+            dirname: dirname,
+            resolve: resolve,
+            isAbsolute: isAbsolute
+        }
+    );
+
+    t.assert.deepStrictEqual(
+        tsconfig.resolve('@data-source'),
+        [ '/path/to/project/src/data-source.ts' ]
+    );
+
+    t.assert.deepStrictEqual(
+        tsconfig.resolve('pendejo.ts'),
+        [ '/path/to/project/src/pendejo.ts' ]
+    );
+});
+
 test('Check path alias with wildcard (1 result)', async (t: test.TestContext) => {
     const tsconfig = new Tsconfig(
         '/path/to/project/tsconfig.json',
