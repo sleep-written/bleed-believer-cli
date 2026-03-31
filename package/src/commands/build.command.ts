@@ -2,8 +2,9 @@ import type { Options } from '@swc/core';
 
 import { glob, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
+import { transform } from '@swc/core';
 
-import { SWCTranspiler, ModuleExtensionsVisitor } from '../lib/swc-transpiler/index.ts';
+import { SourceFile } from '../lib/source-file/index.ts';
 import { Tsconfig } from '../lib/tsconfig/index.ts';
 import { CLI } from '../lib/cli/index.ts';
 
@@ -41,20 +42,18 @@ export const buildCommand = CLI.createCommand(
         );
 
         const config = tsconfig.toSwcConfig();
-        const transpiler = new SWCTranspiler([ new ModuleExtensionsVisitor(true) ]);
         for await (const file of globIterator) {
             if (!file.isFile()) continue;
 
             const options: Options = structuredClone(config);
             options.cwd = cwd;
             options.filename = resolve(file.parentPath, file.name);
-            options.outputPath = ModuleExtensionsVisitor.replaceExtension(
-                outDir + options.filename.slice(rootDir.length),
-                true
-            );
+            options.outputPath = new SourceFile(options.filename)
+                .toJsExt().path
+                .replace(rootDir, outDir);
 
             const src = await readFile(options.filename, 'utf-8');
-            const { code, map } = await transpiler.transform(src, options);
+            const { code, map } = await transform(src, options);
 
             await mkdir(dirname(options.outputPath), { recursive: true });
             await writeFile(options.outputPath, code);

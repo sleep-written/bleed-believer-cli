@@ -1,1 +1,1 @@
-export type { Visitor } from './visitor.ts';
+export type { SWCPlugin } from './swc-plugin.ts';
