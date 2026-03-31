@@ -1,4 +1,4 @@
-import type { CallExpression, ImportDeclaration, Program } from '@swc/core';
+import type { CallExpression, ExportAllDeclaration, ExportNamedDeclaration, ImportDeclaration, Program } from '@swc/core';
 import type { SWCPlugin, SWCPluginContext, Visitor } from '../interfaces/index.ts';
 
 import { dirname, resolve } from 'path';
@@ -26,14 +26,35 @@ export class ImportExtensionPlugin implements SWCPlugin, Visitor {
     onCallExpression(node: CallExpression, context: SWCPluginContext): CallExpression {
         const exp = node.arguments[0]?.expression;
         if (node.callee.type === 'Import' && exp?.type === 'StringLiteral') {
-            exp.value = this.#resolveValue(exp.value, context);
+            const newValue = this.#resolveValue(exp.value, context);
+            exp.raw = exp.raw?.replace(exp.value, newValue);
+            exp.value = newValue;
         }
 
         return node;
     }
 
     onImportDeclaration(node: ImportDeclaration, context: SWCPluginContext): ImportDeclaration {
-        node.source.value = this.#resolveValue(node.source.value, context);
+        const newValue = this.#resolveValue(node.source.value, context);
+        node.source.raw = node.source.raw?.replace(node.source.value, newValue);
+        node.source.value = newValue;
+        return node;
+    }
+
+    onExportNamedDeclaration(node: ExportNamedDeclaration, context: SWCPluginContext): ExportNamedDeclaration {
+        if (node.source) {
+            const newValue = this.#resolveValue(node.source.value, context);
+            node.source.raw = node.source.raw?.replace(node.source.value, newValue);
+            node.source.value = newValue;
+        }
+
+        return node;
+    }
+
+    onExportAllDeclaration(node: ExportAllDeclaration, context: SWCPluginContext): ExportAllDeclaration {
+        const newValue = this.#resolveValue(node.source.value, context);
+        node.source.raw = node.source.raw?.replace(node.source.value, newValue);
+        node.source.value = newValue;
         return node;
     }
 }

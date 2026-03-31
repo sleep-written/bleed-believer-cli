@@ -47,7 +47,7 @@ export const buildCommand = CLI.createCommand(
             const srcPath = source.toTsExt().path;
             const outPath = source.toJsExt().path.replace(rootDir, outDir);
             const { code, map } = await swc.transform(srcPath, outPath);
-
+            
             await mkdir(dirname(outPath), { recursive: true });
             await writeFile(outPath, code);
 

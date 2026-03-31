@@ -1,5 +1,6 @@
 import type { ArgvOutput, ArgvSettings, CLIInject, Command } from './interfaces/index.ts';
 
+import { CommandNotFoundError } from './command-not-found.error.ts';
 import { ArgvParserError } from './argv-parser.error.ts';
 import { argvParser } from './argv-parser.ts';
 
@@ -19,6 +20,9 @@ export class CLI {
 
     #injected: Required<CLIInject>;
     #commands = new Set<Command<ArgvSettings>>();
+    get commands(): Command<ArgvSettings>[] {
+        return Array.from(this.#commands);
+    }
 
     constructor(inject?: CLIInject) {
         this.#injected = {
@@ -47,6 +51,6 @@ export class CLI {
             }
         }
 
-        throw new Error(`None command matched with the provided arguments.`);
+        throw new CommandNotFoundError();
     }
 }

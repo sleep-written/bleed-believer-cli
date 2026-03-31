@@ -3,23 +3,24 @@
   "version": "0.1.1",
   "description": "A ts-node replacement with path alias resolution and SWC under the hood",
   "type": "module",
-  "module": "./src/index.ts",
+  "module": "./dist/index.js",
   "files": [
     "dist",
     "banner.txt"
   ],
   "exports": {
     ".": {
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "bin": {
-    "@bleed-believer/path-alias": "./src/cli.ts",
-    "bleed": "./src/cli.ts"
+    "@bleed-believer/path-alias": "./dist/cli.js",
+    "bleed": "./dist/cli.js"
   },
   "scripts": {
     "test": "node --test",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "build": "node ./src/cli.ts build -c tsconfig.build.json"
   },
   "repository": {
     "type": "git",

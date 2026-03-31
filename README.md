@@ -1,7 +1,28 @@
 # bleed-believer cli
-A ts-node replacement with path alias resolution and SWC under the hood. Full documentation [here](./package/README.md).
+## Installation
+Using npm:
+```shell
+npm i --save-dev @bleed-believer/cli
+```
 
-## Examples
--   [Minimal example](./examples/01-minimal-example/README.md) without a tsconfig file.
--   [Simple project](./examples/02-simple-project/README.md) with a tsconfig file and output path.
--   [TypeORM project](./examples/03-typeorm/README.md) with a more complex escenario.
+## Usage
+To execute typescript files (for example `./src/index.ts`), simply use:
+```shell
+npx bleed start ./src/index.ts -- arg1 arg2 arg3
+```
+
+To transpile your project:
+```shell
+npx bleed build
+```
+
+...if you want to specify your custon tsconfig file:
+```shell
+# For execution
+npx bleed start ./src/index.ts --config ./tsconfig.build.json -- arg1 arg2 arg3
+npx bleed start ./src/index.ts -c ./tsconfig.build.json -- arg1 arg2 arg3
+
+# For transpile
+npx bleed build --config ./tsconfig.build.json
+npx bleed build -c ./tsconfig.build.json
+```
