@@ -1,1 +1,0 @@
-export type { SWCPlugin } from './swc-plugin.ts';

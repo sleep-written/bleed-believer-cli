@@ -1,12 +1,10 @@
-import type { Options } from '@swc/core';
-
-import { glob, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
-import { transform } from '@swc/core';
+import { glob, mkdir, writeFile } from 'node:fs/promises';
 
 import { SourceFile } from '../lib/source-file/index.ts';
 import { Tsconfig } from '../lib/tsconfig/index.ts';
 import { CLI } from '../lib/cli/index.ts';
+import { SWC } from '../lib/swc/index.ts';
 
 export const buildCommand = CLI.createCommand(
     {
@@ -41,25 +39,20 @@ export const buildCommand = CLI.createCommand(
             }
         );
 
-        const config = tsconfig.toSwcConfig();
+        const swc = new SWC(tsconfig);
         for await (const file of globIterator) {
             if (!file.isFile()) continue;
 
-            const options: Options = structuredClone(config);
-            options.cwd = cwd;
-            options.filename = resolve(file.parentPath, file.name);
-            options.outputPath = new SourceFile(options.filename)
-                .toJsExt().path
-                .replace(rootDir, outDir);
+            const source = new SourceFile(resolve(file.parentPath, file.name));
+            const srcPath = source.toTsExt().path;
+            const outPath = source.toJsExt().path.replace(rootDir, outDir);
+            const { code, map } = await swc.transform(srcPath, outPath);
 
-            const src = await readFile(options.filename, 'utf-8');
-            const { code, map } = await transform(src, options);
-
-            await mkdir(dirname(options.outputPath), { recursive: true });
-            await writeFile(options.outputPath, code);
+            await mkdir(dirname(outPath), { recursive: true });
+            await writeFile(outPath, code);
 
             if (typeof map === 'string') {
-                await writeFile(options.outputPath + '.map', map);
+                await writeFile(outPath + '.map', map);
             }
         }
     }
