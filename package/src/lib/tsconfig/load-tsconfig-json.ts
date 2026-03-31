@@ -163,6 +163,7 @@ export async function loadTsconfigJSON(path: string, inject?: LoadTsconfigJSONIn
             'noEmit',
             'sourceMap',
             'removeComments',
+            'resolveJsonModule',
             'emitDeclarationOnly',
             'verbatimModuleSyntax',
             'emitDecoratorMetadata',

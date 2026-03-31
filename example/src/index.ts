@@ -1,7 +1,8 @@
+import packageJson from '../package.json' with { type: 'json' };
 import { styleText } from 'node:util';
 import { encode } from '@toon-format/toon';
+import { sum } from '@lib/sum.ts';
 
-import packageJson from '../package.json' with { type: 'json' };
 console.log('package.json:', packageJson);
 
 console.log(
@@ -18,6 +19,14 @@ console.log(
         'green',
         await import('@toon-format/toon')
             .then(x => x.encode({ bak: 'baz' }))
+    )
+);
+
+console.log(
+    'value:',
+    styleText(
+        'yellow',
+        sum(0, 0).toString()
     )
 );
 

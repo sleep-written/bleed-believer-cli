@@ -1,13 +1,16 @@
 import type { SWCPlugin, TsconfigObject, SWCInject, SWCPluginContext } from './interfaces/index.ts';
-import { transform, type Config, type Options, type Output } from '@swc/core';
-import { readFile } from 'fs/promises';
+import type { Config, Options, Output } from '@swc/core';
+
 import { dirname, resolve, sep } from 'path';
+import { transform } from '@swc/core';
+import { readFile } from 'fs/promises';
 
 export class SWC {
     #injected: Required<SWCInject>;
     #tsconfig: TsconfigObject;
     #plugins: SWCPlugin[];
     #config: Config;
+    #cwd: string;
 
     constructor(tsconfig: TsconfigObject, plugins?: SWCPlugin[], inject?: SWCInject) {
         this.#tsconfig = tsconfig;
@@ -20,15 +23,16 @@ export class SWC {
 
         this.#plugins = plugins ?? [];
         this.#config = tsconfig.toSwcConfig();
+        this.#cwd = this.#injected.dirname(this.#tsconfig.path);
     }
 
     async transform(srcPath: string, outPath?: string): Promise<Output> {
-        const context: SWCPluginContext = { srcPath, outPath, tsconfig: this.#tsconfig };
+        const context: SWCPluginContext = { srcPath, outPath };
         const options: Options = {
             ...this.#config,
             outputPath: outPath,
             filename: srcPath,
-            cwd: this.#injected.dirname(this.#tsconfig.path),
+            cwd: this.#cwd,
 
             plugin: program => {
                 for (const plugin of this.#plugins) {

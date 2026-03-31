@@ -3,10 +3,28 @@ import type { SourceFileInject } from './interfaces/index.ts';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, sep } from 'node:path';
 import { access, readFile } from 'node:fs/promises';
+import { accessSync } from 'node:fs';
 
 export class SourceFile {
-    #injected: Required<SourceFileInject>;
+    static toTsExt(specifier: string): string {
+        return specifier.replace(
+            /(?<=\.(?:m|c)?)j(?=sx?$)/i,
+            v => v === v.toUpperCase()
+            ?   'T'
+            :   't'
+        );
+    }
 
+    static toJsExt(specifier: string): string {
+        return specifier.replace(
+            /(?<=\.(?:m|c)?)t(?=sx?$)/i,
+            v => v === v.toUpperCase()
+            ?   'J'
+            :   'j'
+        );
+    }
+
+    #injected: Required<SourceFileInject>;
     #path: string;
     get path(): string {
         return this.#path;
@@ -30,13 +48,22 @@ export class SourceFile {
         return this.#url;
     }
 
+    get isTs(): boolean {
+        return /\.(?:c|m)?tsx?$/i.test(this.#path);
+    }
+
+    get isJs(): boolean {
+        return /\.(?:c|m)?jsx?$/i.test(this.#path);
+    }
+
     constructor(pathOrFileURL: string, inject?: SourceFileInject) {
         this.#injected = {
-            readFile:   inject?.readFile?.bind(inject)  ?? readFile,
-            dirname:    inject?.dirname?.bind(inject)   ?? dirname,
-            resolve:    inject?.resolve?.bind(inject)   ?? resolve,
-            access:     inject?.access?.bind(inject)    ?? access,
-            sep:        inject?.sep                     ?? sep,
+            accessSync: inject?.accessSync?.bind(inject)    ?? accessSync,
+            readFile:   inject?.readFile?.bind(inject)      ?? readFile,
+            dirname:    inject?.dirname?.bind(inject)       ?? dirname,
+            resolve:    inject?.resolve?.bind(inject)       ?? resolve,
+            access:     inject?.access?.bind(inject)        ?? access,
+            sep:        inject?.sep                         ?? sep,
         };
 
         this.#path = /^file:\/{2}/.test(pathOrFileURL)
@@ -53,25 +80,22 @@ export class SourceFile {
         }
     }
 
-    toTsExt(): SourceFile {
-        const path = this.#path.replace(
-            /(?<=\.(?:m|c)?)j(?=sx?$)/i,
-            v => v === v.toUpperCase()
-            ?   'T'
-            :   't'
-        );
+    existsSync(): boolean {
+        try {
+            this.#injected.accessSync(this.#path);
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
+    toTsExt(): SourceFile {
+        const path = SourceFile.toTsExt(this.#path);
         return new SourceFile(path, this.#injected);
     }
 
     toJsExt(): SourceFile {
-        const path = this.#path.replace(
-            /(?<=\.(?:m|c)?)t(?=sx?$)/i,
-            v => v === v.toUpperCase()
-            ?   'J'
-            :   'j'
-        );
-
+        const path = SourceFile.toJsExt(this.#path);
         return new SourceFile(path, this.#injected);
     }
 

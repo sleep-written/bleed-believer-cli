@@ -1,10 +1,10 @@
 import { dirname, join, resolve, sep } from 'node:path';
 import { glob, mkdir, writeFile } from 'node:fs/promises';
 
+import { SWC, ImportExtensionPlugin } from '../lib/swc/index.ts';
 import { SourceFile } from '../lib/source-file/index.ts';
 import { Tsconfig } from '../lib/tsconfig/index.ts';
 import { CLI } from '../lib/cli/index.ts';
-import { SWC } from '../lib/swc/index.ts';
 
 export const buildCommand = CLI.createCommand(
     {
@@ -39,7 +39,7 @@ export const buildCommand = CLI.createCommand(
             }
         );
 
-        const swc = new SWC(tsconfig);
+        const swc = new SWC(tsconfig, [ new ImportExtensionPlugin() ]);
         for await (const file of globIterator) {
             if (!file.isFile()) continue;
 

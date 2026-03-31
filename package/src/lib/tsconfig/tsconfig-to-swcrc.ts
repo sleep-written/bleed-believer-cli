@@ -10,6 +10,7 @@ export function tsconfigToSwcrc(input: TsconfigJSON): Config {
             if (compilerOptions.strict) {
                 module.strict = true;
             }
+
             break;
         }
 
@@ -63,6 +64,13 @@ export function tsconfigToSwcrc(input: TsconfigJSON): Config {
 
     if (compilerOptions.baseUrl) {
         jsc.baseUrl = compilerOptions.baseUrl;
+    }
+
+    if (compilerOptions.resolveJsonModule) {
+        jsc.experimental = {
+            ...(jsc.experimental ?? {}),
+            keepImportAssertions: true
+        };
     }
 
     if (compilerOptions.verbatimModuleSyntax) {

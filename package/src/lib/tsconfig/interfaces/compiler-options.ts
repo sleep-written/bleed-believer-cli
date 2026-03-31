@@ -11,6 +11,7 @@ export interface CompilerOptions {
     noEmit?: boolean;
     sourceMap?: boolean;
     removeComments?: boolean;
+    resolveJsonModule?: boolean;
     emitDeclarationOnly?: boolean;
     verbatimModuleSyntax?: boolean;
     emitDecoratorMetadata?: boolean;
