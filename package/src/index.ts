@@ -1,4 +1,6 @@
-import { register } from "node:module";
+import { register } from 'node:module';
+import { extname } from 'node:path';
 
-const url = new URL('./hooks.ts', import.meta.url);
+const ext = extname(import.meta.url);
+const url = new URL(`./hooks${ext}`, import.meta.url);
 register(url);

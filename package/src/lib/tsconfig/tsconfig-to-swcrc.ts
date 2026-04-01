@@ -58,13 +58,13 @@ export function tsconfigToSwcrc(input: TsconfigJSON): Config {
         preserveAllComments: !compilerOptions.removeComments
     };
 
-    if (compilerOptions.paths) {
-        jsc.paths = compilerOptions.paths;
-    }
+    // if (compilerOptions.paths) {
+    //     jsc.paths = compilerOptions.paths;
+    // }
 
-    if (compilerOptions.baseUrl) {
-        jsc.baseUrl = compilerOptions.baseUrl;
-    }
+    // if (compilerOptions.baseUrl) {
+    //     jsc.baseUrl = compilerOptions.baseUrl;
+    // }
 
     if (compilerOptions.resolveJsonModule) {
         jsc.experimental = {

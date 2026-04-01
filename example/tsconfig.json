@@ -13,9 +13,8 @@
 
         "outDir": "./dist",
         "rootDir": "./src",
-        "baseUrl": "./src",
         "paths": {
-            "@lib/*": [ "./lib-old/*", "./lib/*" ]
+            "@lib/*": [ "./src/lib-old/*", "./src/lib/*" ]
         }
     },
     "exclude": [

@@ -10,7 +10,10 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js"
+      "import": [
+        "./dist/index.js",
+        "./src/index.ts"
+      ]
     }
   },
   "bin": {

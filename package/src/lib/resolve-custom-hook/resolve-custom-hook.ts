@@ -36,13 +36,17 @@ export class ResolveCustomHook {
         context: ResolveHookContext,
         defaultResolve: Parameters<ResolveHook>[2]
     ): Promise<ResolveFnOutput> {
-        if (this.#cache.has(specifier)) {
-            const cachedSpecifier = this.#cache.get(specifier)!;
+        const cacheKey = typeof context.parentURL === 'string'
+        ?   context.parentURL + '::' + specifier
+        :   specifier;
+
+        if (this.#cache.has(cacheKey)) {
+            const cachedSpecifier = this.#cache.get(cacheKey)!;
             return defaultResolve(cachedSpecifier, context);
         }
 
         if (isBuiltin(specifier) || typeof context.parentURL !== 'string') {
-            this.#cache.set(specifier, specifier);
+            this.#cache.set(cacheKey, specifier);
             return defaultResolve(specifier, context);
         }
 
@@ -57,7 +61,7 @@ export class ResolveCustomHook {
                 const resolved = path.replace(this.#outDir, this.#rootDir);
                 const file = new SourceFile(resolved).toTsExt();
                 if (await file.exists()) {
-                    this.#cache.set(specifier, file.url.href);
+                    this.#cache.set(cacheKey, file.url.href);
                     return defaultResolve(file.url.href, context);
                 }
 
@@ -65,14 +69,14 @@ export class ResolveCustomHook {
                 const resolved = path.replace(this.#rootDir, this.#outDir);
                 const file = new SourceFile(resolved).toJsExt();
                 if (await file.exists()) {
-                    this.#cache.set(specifier, file.url.href);
+                    this.#cache.set(cacheKey, file.url.href);
                     return defaultResolve(file.url.href, context);
                 }
 
             }
         }
 
-        this.#cache.set(specifier, specifier);
+        this.#cache.set(cacheKey, specifier);
         return defaultResolve(specifier, context);
     }
 }

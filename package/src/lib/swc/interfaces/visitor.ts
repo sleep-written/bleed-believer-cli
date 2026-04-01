@@ -3,7 +3,7 @@ import type {
     AwaitExpression, BinaryExpression, BlockStatement, BooleanLiteral,
     BreakStatement, CallExpression, ClassDeclaration, ClassExpression,
     ConditionalExpression, ContinueStatement, DoWhileStatement,
-    ExportAllDeclaration, ExportDefaultDeclaration, ExportDefaultExpression,
+    ExportAllDeclaration, ExportDeclaration, ExportDefaultDeclaration, ExportDefaultExpression,
     ExportNamedDeclaration, ExpressionStatement, ForInStatement,
     ForOfStatement, ForStatement, FunctionDeclaration, FunctionExpression,
     Identifier, IfStatement, ImportDeclaration, LabeledStatement,
@@ -21,6 +21,7 @@ import type { SWCPluginContext } from './index.ts';
 export interface Visitor {
     // Module items
     onImportDeclaration?(node: ImportDeclaration, context: SWCPluginContext): ImportDeclaration;
+    onExportDeclaration?(node: ExportDeclaration, context: SWCPluginContext): ExportDeclaration;
     onExportNamedDeclaration?(node: ExportNamedDeclaration, context: SWCPluginContext): ExportNamedDeclaration;
     onExportDefaultDeclaration?(node: ExportDefaultDeclaration, context: SWCPluginContext): ExportDefaultDeclaration;
     onExportDefaultExpression?(node: ExportDefaultExpression, context: SWCPluginContext): ExportDefaultExpression;

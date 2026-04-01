@@ -39,7 +39,7 @@ export const buildCommand = CLI.createCommand(
             }
         );
 
-        const swc = new SWC(tsconfig, [ new ImportExtensionPlugin() ]);
+        const swc = new SWC(tsconfig, [ new ImportExtensionPlugin(tsconfig) ]);
         for await (const file of globIterator) {
             if (!file.isFile()) continue;
 

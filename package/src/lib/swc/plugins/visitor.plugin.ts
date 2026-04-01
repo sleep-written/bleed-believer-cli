@@ -23,6 +23,10 @@ export class VisitorPlugin implements SWCPlugin {
             case 'ImportDeclaration':
                 return (this.#visitor.onImportDeclaration?.(node, context) ?? node) as N;
 
+            case 'ExportDeclaration':
+                node.declaration = this.#visit(node.declaration, context);
+                return (this.#visitor.onExportDeclaration?.(node, context) ?? node) as N;
+
             case 'ExportNamedDeclaration':
                 return (this.#visitor.onExportNamedDeclaration?.(node, context) ?? node) as N;
 
@@ -281,6 +285,7 @@ export class VisitorPlugin implements SWCPlugin {
             }
 
             case 'OptionalChainingExpression':
+                node.base = this.#visit(node.base, context);
                 return (this.#visitor.onOptionalChainingExpression?.(node, context) ?? node) as N;
 
             case 'SuperPropExpression':
