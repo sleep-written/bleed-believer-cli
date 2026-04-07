@@ -1,56 +1,38 @@
+import type { TsconfigObject, PathAliasInject, TargetFileObject } from './interfaces/index.ts';
+
+import { TargetFile } from '../target-file/index.ts';
+
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import type { TsconfigObject, PathAliasInject } from './interfaces/index.ts';
-import { dirname, relative, resolve, sep } from 'node:path';
-import { isBuiltin } from 'node:module';
 import { accessSync } from 'node:fs';
+import { isBuiltin } from 'node:module';
 
 export class PathAlias {
-    static #toTsExt(specifier: string): string {
-        return specifier.replace(
-            /(?<=\.(?:m|c)?)j(?=sx?$)/i,
-            v => v === v.toUpperCase()
-            ?   'T'
-            :   't'
-        );
-    }
-
-    static #toJsExt(specifier: string): string {
-        return specifier.replace(
-            /(?<=\.(?:m|c)?)t(?=sx?$)/i,
-            v => v === v.toUpperCase()
-            ?   'J'
-            :   'j'
-        );
-    }
-
-    #cwd: string;
-    #aliases = new Map<RegExp, string[]>();
-    #outDir: string;
-    #rootDir: string;
     #injected: Required<PathAliasInject>;
+    #tsconfig: TsconfigObject;
+    #aliases = new Map<RegExp, string[]>();
 
     constructor(tsconfig: TsconfigObject, inject?: PathAliasInject) {
         this.#injected = {
             fileURLToPath:  inject?.fileURLToPath?.bind(inject) ??  fileURLToPath,
             pathToFileURL:  inject?.pathToFileURL?.bind(inject) ??  pathToFileURL,
             accessSync:     inject?.accessSync?.bind(inject)    ??  accessSync,
+            isAbsolute:     inject?.isAbsolute?.bind(inject)    ??  isAbsolute,
             relative:       inject?.relative?.bind(inject)      ??  relative,
             dirname:        inject?.dirname?.bind(inject)       ??  dirname,
             resolve:        inject?.resolve?.bind(inject)       ??  resolve,
-            sep:            inject?.sep                         ??  sep
+
+            targetFile:     inject?.targetFile  ??  TargetFile,
+            sep:            inject?.sep         ??  sep
         };
 
-        this.#cwd = this.#injected.resolve(tsconfig.path, '..');
-        this.#outDir = this.#injected.resolve(
-            this.#cwd,
-            tsconfig.options.outDir ?? '.'
-        );
+        const cwd = this.#injected.dirname(tsconfig.path);
+        let baseUrl = tsconfig.options.baseUrl;
+        if (typeof baseUrl === 'string' && !this.#injected.isAbsolute(baseUrl)) {
+            baseUrl = this.#injected.resolve(cwd, baseUrl);
+        }
 
-        this.#rootDir = this.#injected.resolve(
-            this.#cwd,
-            tsconfig.options.rootDir ?? '.'
-        );
-
+        this.#tsconfig = tsconfig;
         Object
             .entries(tsconfig.options.paths ?? {})
             .forEach(([ alias, paths ]) => {
@@ -58,22 +40,28 @@ export class PathAlias {
                     .escape(alias)
                     .replace(/\\\*/g, '(.+)');
 
+                const path = baseUrl ?? cwd;
                 this.#aliases.set(
                     new RegExp(`^${pattern}$`),
-                    paths.map(x => this.#injected.resolve(this.#cwd, x))
+                    paths.map(x => this.#injected.resolve(path, x))
                 );
             });
     }
 
-    resolve(specifier: string, parentPathOrURL?: string) {
-        const parentPath = parentPathOrURL?.startsWith('file://')
-        ?   this.#injected.fileURLToPath(parentPathOrURL)
-        :   parentPathOrURL;
+    #newTargetFile(pathOrFileURL: string): TargetFileObject {
+        return new this.#injected.targetFile(
+            pathOrFileURL,
+            this.#tsconfig,
+            this.#injected
+        );
+    }
 
+    resolve(specifier: string, pathOrFileURL: string) {
         if (isBuiltin(specifier)) {
             return specifier;
         }
 
+        const file = this.#newTargetFile(pathOrFileURL);
         for (const [ regExp, paths ] of this.#aliases) {
             const parts = regExp.exec(specifier)?.slice(1);
             if (!parts) {
@@ -81,18 +69,25 @@ export class PathAlias {
             }
 
             for (let path of paths) {
-                try {
-                    path = PathAlias.#toTsExt(path);
-                    parts.forEach(x => { path = path.replace('*', x) });
-                    this.#injected.accessSync(path);
+                parts.forEach(x => { path = path.replace('*', x); });
+                const targetTsFile = this.#newTargetFile(path).toTs();
+                if (file.isTs && targetTsFile.exists) {
+                    const value = this.#injected.relative(
+                        file.dirname,
+                        targetTsFile.toString()
+                    );
 
-                    return typeof parentPath === 'string'
-                    ?   `.${this.#injected.sep}` + this.#injected.relative(this.#injected.dirname(parentPath), path)
-                    :   this.#injected.pathToFileURL(path).href;
+                    return `.${this.#injected.sep}${value}`;
+                }
+                
+                const targetJsFile = targetTsFile.toJs();
+                if (file.isJs && targetTsFile.exists) {
+                    const value = this.#injected.relative(
+                        file.dirname,
+                        targetJsFile.toString()
+                    );
 
-                } catch {
-                    continue;
-
+                    return `.${this.#injected.sep}${value}`;
                 }
             }
         }

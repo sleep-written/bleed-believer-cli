@@ -11,7 +11,10 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "verbatimModuleSyntax": true,
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        "types": [
+            "node"
+        ]
     },
     "exclude": [
         "dist/**"
