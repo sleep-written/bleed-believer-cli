@@ -12,7 +12,13 @@ export class PathAlias {
     #tsconfig: TsconfigObject;
     #aliases = new Map<RegExp, string[]>();
 
-    constructor(tsconfig: TsconfigObject, inject?: PathAliasInject) {
+    #toOutDir: boolean;
+    get toOutDir(): boolean {
+        return this.#toOutDir;
+    }
+
+    constructor(tsconfig: TsconfigObject, toOutDir?: boolean, inject?: PathAliasInject) {
+        this.#toOutDir = !!toOutDir;
         this.#injected = {
             fileURLToPath:  inject?.fileURLToPath?.bind(inject) ??  fileURLToPath,
             pathToFileURL:  inject?.pathToFileURL?.bind(inject) ??  pathToFileURL,
@@ -56,7 +62,7 @@ export class PathAlias {
         );
     }
 
-    resolve(specifier: string, pathOrFileURL: string) {
+    resolve(specifier: string, pathOrFileURL: string): string {
         if (isBuiltin(specifier)) {
             return specifier;
         }
@@ -71,7 +77,9 @@ export class PathAlias {
             for (let path of paths) {
                 parts.forEach(x => { path = path.replace('*', x); });
                 const targetTsFile = this.#newTargetFile(path).toTs();
-                if (file.isTs && targetTsFile.exists) {
+                
+
+                if (file.isTs && !this.#toOutDir && targetTsFile.exists) {
                     const value = this.#injected.relative(
                         file.dirname,
                         targetTsFile.toString()
@@ -79,9 +87,9 @@ export class PathAlias {
 
                     return `.${this.#injected.sep}${value}`;
                 }
-                
+
                 const targetJsFile = targetTsFile.toJs();
-                if (file.isJs && targetTsFile.exists) {
+                if (file.isJs && targetJsFile.exists) {
                     const value = this.#injected.relative(
                         file.dirname,
                         targetJsFile.toString()

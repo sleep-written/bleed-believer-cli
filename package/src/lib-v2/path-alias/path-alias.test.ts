@@ -67,7 +67,7 @@ const tsconfig: TsconfigObject = {
 
 describe('Resolve to rootDir', () => {
     test('import "@lib/elphis/index.ts" from "/path/to/project/src/index.ts"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, false, inject);
         const result = pathAlias.resolve(
             '@lib/elphis/index.ts',
             '/path/to/project/src/index.ts'
@@ -77,7 +77,7 @@ describe('Resolve to rootDir', () => {
     });
     
     test('import "@/data-source.ts" from "/path/to/project/src/lib/elphis/elphis.test.ts"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, false, inject);
         const result = pathAlias.resolve(
             '@/data-source.ts',
             '/path/to/project/src/lib/elphis/elphis.test.ts'
@@ -87,7 +87,7 @@ describe('Resolve to rootDir', () => {
     });
     
     test('import "typeorm" from "/path/to/project/src/lib/elphis/elphis.test.ts"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, false, inject);
         const result = pathAlias.resolve(
             'typeorm',
             '/path/to/project/src/lib/elphis/elphis.test.ts'
@@ -97,7 +97,7 @@ describe('Resolve to rootDir', () => {
     });
     
     test('import "discord.js" from "/path/to/project/src/lib/elphis/elphis.test.ts"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, false, inject);
         const result = pathAlias.resolve(
             'discord.js',
             '/path/to/project/src/lib/elphis/elphis.test.ts'
@@ -109,7 +109,7 @@ describe('Resolve to rootDir', () => {
 
 describe('Resolve to outDir', () => {
     test('import "@lib/elphis/index.ts" from "/path/to/project/dist/index.js"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, true, inject);
         const result = pathAlias.resolve(
             '@lib/elphis/index.ts',
             '/path/to/project/dist/index.js'
@@ -119,7 +119,7 @@ describe('Resolve to outDir', () => {
     });
     
     test('import "@/data-source.ts" from "/path/to/project/dist/lib/elphis/elphis.test.js"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, true, inject);
         const result = pathAlias.resolve(
             '@/data-source.ts',
             '/path/to/project/dist/lib/elphis/elphis.test.js'
@@ -129,7 +129,7 @@ describe('Resolve to outDir', () => {
     });
     
     test('import "typeorm" from "/path/to/project/dist/lib/elphis/elphis.test.js"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, true, inject);
         const result = pathAlias.resolve(
             'typeorm',
             '/path/to/project/dist/lib/elphis/elphis.test.js'
@@ -139,7 +139,7 @@ describe('Resolve to outDir', () => {
     });
     
     test('import "discord.ts" from "/path/to/project/dist/lib/elphis/elphis.test.js"', (t: test.TestContext) => {
-        const pathAlias = new PathAlias(tsconfig, inject);
+        const pathAlias = new PathAlias(tsconfig, true, inject);
         const result = pathAlias.resolve(
             'discord.ts',
             '/path/to/project/dist/lib/elphis/elphis.test.js'

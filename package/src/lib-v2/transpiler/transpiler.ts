@@ -1,61 +1,95 @@
-import type { TsconfigObject, VisitorObject, VisitorContext } from './interfaces/index.ts';
-import type { TransformerFactory, SourceFile, Visitor } from 'typescript';
+import type { TransformationContext, SourceFile, Visitor, Transformer, Node } from 'typescript';
+import type { TranspilerInject, TsconfigObject, VisitorObject } from './interfaces/index.ts';
 
-import { createSourceFile, ScriptTarget, transform, createPrinter, NewLineKind, visitEachChild, visitNode } from 'typescript';
-import { basename } from 'node:path';
+import { getImpliedNodeFormatForFile, sys, ModuleKind, ModuleResolutionKind } from 'typescript';
+import { visitEachChild, transpileModule, JSDocParsingMode, visitNode } from 'typescript';
+import { dirname, parse, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
 
 export class Transpiler {
-    #visitors: VisitorObject[];
+    static createVisitor<N extends Node>(
+        accept: VisitorObject<N>['accept'],
+        visit: VisitorObject<N>['visit'],
+    ): VisitorObject<N> {
+        return { accept, visit };
+    }
+
+    #injected: Required<TranspilerInject>;
     #tsconfig: TsconfigObject;
+    #visitors: VisitorObject[];
 
-    constructor(tsconfig: TsconfigObject, ...visitors: VisitorObject[]) {
+    constructor(
+        tsconfig: TsconfigObject,
+        visitors?: VisitorObject[],
+        inject?: TranspilerInject
+    ) {
         this.#tsconfig = tsconfig;
-        this.#visitors = visitors;
-    }
+        this.#visitors = visitors ?? [];
+        this.#injected = {
+            getImpliedNodeFormatForFile: (
+                inject?.getImpliedNodeFormatForFile?.bind(inject) ??
+                getImpliedNodeFormatForFile
+            ),
 
-    #createTransformerFactory(visitorContext: VisitorContext): TransformerFactory<SourceFile> {
-        // The factory
-        return context => {
-            // The native visitor
-            return sourceFile => {
-                // My custom visitor mechanism
-                for (const visitorObject of this.#visitors) {
-                    const visitor: Visitor = node => {
-                        if (visitorObject.accept(node)) {
-                            const result = visitorObject.visit(node, visitorContext);
-                            if (result) {
-                                node = result;
-                            }
-                        }
-
-                        return visitEachChild(node, visitor, context);
-                    };
-
-                    sourceFile = visitEachChild(sourceFile, visitor, context);
-                }
-    
-                return sourceFile;
-            };
+            readFile:   inject?.readFile?.bind(inject)  ?? readFile,
+            resolve:    inject?.resolve?.bind(inject)   ?? resolve,
+            dirname:    inject?.dirname?.bind(inject)   ?? dirname,
+            parse:      inject?.parse?.bind(inject)     ?? parse,
         };
     }
 
-    transform(path: string, code: string): string {
-        const context: VisitorContext = {
-            filename: path,
-            tsconfig: this.#tsconfig
+    #transformer(context: TransformationContext): Transformer<SourceFile> {
+        // The native visitor
+        return sourceFile => {
+            // My custom visitor mechanism
+            for (const visitorObject of this.#visitors) {
+                const visitor: Visitor = node => {
+                    if (visitorObject.accept(node)) {
+                        return visitorObject.visit(node);
+                    }
+
+                    return visitEachChild(node, visitor, context);
+                };
+
+                sourceFile = visitNode(sourceFile, visitor) as SourceFile;
+            }
+
+            return sourceFile;
         };
-        
-        const target = this.#tsconfig.options.target ?? ScriptTarget.ES2025;
-        const result = transform(
-            createSourceFile(basename(path), code, target, true),
-            [ this.#createTransformerFactory(context) ]
+    }
+
+    async transform(path: string): Promise<{ code: string; map?: string; }> {
+        const source = await this.#injected.readFile(path, 'utf-8');
+        const module = this.#injected.getImpliedNodeFormatForFile(
+            path, undefined, sys,
+            this.#tsconfig.options
         );
 
-        const printer = createPrinter({
-            newLine: NewLineKind.LineFeed,
-            removeComments: false
+        const { outputText, sourceMapText, diagnostics } = transpileModule(source, {
+            compilerOptions: {
+                ...this.#tsconfig.options,
+                moduleResolution: module === ModuleKind.ESNext
+                ?   ModuleResolutionKind.Bundler
+                :   this.#tsconfig.options.moduleResolution,
+                module
+            },
+            transformers: {
+                before: [ this.#transformer.bind(this)  ]
+            },
+            reportDiagnostics: true,
+            jsDocParsingMode: JSDocParsingMode.ParseAll,
+            moduleName: this.#injected.parse(path).name,
+            fileName: path
         });
 
-        return printer.printFile(result.transformed[0]);
+        const [ except ] = diagnostics ?? [];
+        if (except) {
+            throw new Error(except.messageText.toString());
+        }
+
+        return {
+            code: outputText,
+            map: sourceMapText
+        };
     }
 }
