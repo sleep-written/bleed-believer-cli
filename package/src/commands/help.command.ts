@@ -1,8 +1,6 @@
 import type { ParseArgsOptionsType } from 'node:util';
 
 import { styleText } from 'node:util';
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { CLI } from '../lib/cli/index.ts';
 
 interface Dcto {
@@ -60,7 +58,7 @@ export const helpCommand = CLI.createCommand(
     {
         positionals: [ 'help' ] as const
     },
-    async (o, c) => {
+    async (_, c) => {
         const defaultInfo = 'None information provided';
         const dctos = c
             .filter(x => x !== helpCommand)
@@ -77,22 +75,6 @@ export const helpCommand = CLI.createCommand(
                         default: v.default
                     }))
             } as Dcto));
-
-        const banner = await readFile(
-            resolve(import.meta.dirname, '../../banner.txt'),
-            'utf-8'
-        );
-
-        console.log(styleText('greenBright', banner));
-        console.log('');
-        console.log(
-            ''.padStart(21, ' '),
-            styleText(
-                [ 'bold', 'yellow' ],
-                '@bleed-believer/cli'
-            )
-        );
-        console.log('');
 
         for (const dcto of dctos) {
             print(dcto);

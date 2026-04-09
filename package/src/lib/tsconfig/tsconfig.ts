@@ -1,110 +1,130 @@
-import type { TsconfigJSON, TsconfigInject } from './interfaces/index.ts';
-import type { Config } from '@swc/core';
+import type { TsconfigLoadInject } from './interfaces/index.ts';
+import type { CompilerOptions } from 'typescript';
 
-import { dirname, isAbsolute, resolve } from 'node:path';
-import { isBuiltin } from 'node:module';
-
-import { loadTsconfigJSON } from './load-tsconfig-json.ts';
-import { tsconfigToSwcrc } from './tsconfig-to-swcrc.ts';
+import { readConfigFile, convertCompilerOptionsFromJson } from 'typescript';
+import { basename, dirname, normalize, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
 
 export class Tsconfig {
-    static async load(path: string): Promise<Tsconfig> {
-        const out = await loadTsconfigJSON(path);
-        return new Tsconfig(path, out);
+    #options: CompilerOptions;
+    get options(): CompilerOptions {
+        return this.#options;
     }
 
-    #injected: Required<TsconfigInject>;
+    #include: string[];
+    get include(): string[] {
+        return this.#include;
+    }
+
+    #exclude: string[];
+    get exclude(): string[] {
+        return this.#exclude;
+    }
 
     #path: string;
     get path(): string {
         return this.#path;
     }
 
-    #json: TsconfigJSON;
-    get json(): TsconfigJSON {
-        return this.#json;
+    static load(path: string, inject?: TsconfigLoadInject) {
+        const injected: Required<TsconfigLoadInject> = {
+            readConfigFile: inject?.readConfigFile?.bind(inject)    ?? readConfigFile,
+            normalize:      inject?.normalize?.bind(inject)         ?? normalize,
+            basename:       inject?.basename?.bind(inject)          ?? basename,
+            resolve:        inject?.resolve?.bind(inject)           ?? resolve,
+            dirname:        inject?.dirname?.bind(inject)           ?? dirname,
+        }
+
+        let json: any = {};
+        const extend = [ path ];
+        const include: string[] = [];
+        const exclude: string[] = [];
+        while (extend.length > 0) {
+            const filePath = extend.pop()!;
+            const { config, error } = injected.readConfigFile(
+                filePath,
+                p => readFileSync(p, 'utf-8')
+            );
+
+            if (error) {
+                const mainError = new Error(error.messageText.toString());
+                mainError.stack = error.source;
+                throw mainError;
+            }
+
+            if (Array.isArray(config?.['extends'])) {
+                extend.push(...config['extends'].map(x => injected.resolve(filePath, '..', x)));
+                delete config['extends'];
+            } else if (typeof config?.['extends'] === 'string') {
+                extend.push(injected.resolve(filePath, '..', config['extends']));
+                delete config['extends'];
+            }
+            
+            if (Array.isArray(config?.['include'])) {
+                include.unshift(...config['include'])
+            }
+            
+            if (Array.isArray(config?.['exclude'])) {
+                exclude.unshift(...config['exclude'])
+            }
+
+            json = {
+                ...(config?.['compilerOptions'] ?? {}),
+                ...(json)
+            };
+        }
+
+        const { options, errors } = convertCompilerOptionsFromJson(
+            json,
+            injected.dirname(path),
+            injected.basename(path),
+        );
+
+        if (errors.length > 0) {
+            let mainError: Error | undefined;
+            for (const error of errors.toReversed()) {
+                const cause = mainError;
+                mainError = new Error(error.messageText.toString(), { cause });
+                mainError.stack = error.source;
+            }
+
+            throw mainError;
+        }
+
+        delete options.configFilePath;
+        if (typeof options.outDir === 'string') {
+            options.outDir = injected.normalize(options.outDir);
+        }
+
+        if (typeof options.rootDir === 'string') {
+            options.rootDir = injected.normalize(options.rootDir);
+        }
+
+        if (Array.isArray(options.rootDirs)) {
+            options.rootDirs = options.rootDirs.map(x => injected.normalize(x));
+        }
+
+        return new Tsconfig(
+            injected.normalize(path),
+            {
+                options,
+                include,
+                exclude
+            }
+        );
     }
 
     constructor(
         path: string,
-        json: TsconfigJSON,
-        inject?: TsconfigInject
+        json: {
+            options?: CompilerOptions;
+            include?: string[];
+            exclude?: string[];
+        }
     ) {
         this.#path = path;
-        this.#json = json;
-        this.#injected = {
-            dirname:    inject?.dirname?.bind(inject)       ?? dirname,
-            resolve:    inject?.resolve?.bind(inject)       ?? resolve,
-            isAbsolute: inject?.isAbsolute?.bind(inject)    ?? isAbsolute,
-        };
-    }
-
-    resolve(specifier: string): string[] | null {
-        if (isBuiltin(specifier)) {
-            return null;
-        }
-
-        const paths = this.#json.compilerOptions?.paths;
-        if (!paths) {
-            return null;
-        }
-
-        const basePath = this.#injected.resolve(
-            this.#injected.dirname(this.#path),
-            this.#json.compilerOptions?.baseUrl ?? '.'
-        );
-
-        const entries = Object.entries(paths);
-
-        // Separar catch-all del resto para procesarlo último
-        const specific = entries.filter(([k]) => k !== '*');
-        const catchAll = entries.filter(([k]) => k === '*');
-        const ordered  = [...specific, ...catchAll];
-
-        for (const [k, v] of ordered) {
-            const testPattern = new RegExp(
-                k
-                    .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
-                    .replace(/\\\*/g, '.+')
-                    .replace(/^/, '^')
-                    .replace(/$/, '$')
-            );
-
-            if (testPattern.test(specifier)) {
-                const replacePattern = new RegExp(
-                    k
-                        .replace(/\*.*$/, '')
-                        .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
-                        .replace(/^/, '^')
-                );
-
-                return v.map(path =>
-                    this.#injected.resolve(
-                        basePath,
-                        specifier.replace(
-                            replacePattern,
-                            path.replace(/\*/, '')
-                        )
-                    )
-                );
-            }
-        }
-
-        return null;
-    }
-
-    toSwcConfig(): Config {
-        const config = tsconfigToSwcrc(this.#json);
-        if (
-            typeof config.jsc?.baseUrl === 'string' &&
-            !this.#injected.isAbsolute(config.jsc.baseUrl)
-        ) {
-            config.jsc.baseUrl = this.#injected.resolve(
-                this.#injected.dirname(this.#path),
-                config.jsc.baseUrl
-            )
-        }
-
-        return config;
+        this.#include = json?.include ?? [];
+        this.#exclude = json?.exclude ?? [];
+        this.#options = json?.options ?? {};
     }
 }

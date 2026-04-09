@@ -1,8 +1,7 @@
-import { dirname, join, resolve, sep } from 'node:path';
 import { glob, mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
 
-import { SWC, ImportExtensionPlugin } from '../lib/swc/index.ts';
-import { SourceFile } from '../lib/source-file/index.ts';
+import { Transpiler, PathAliasPlugin } from '../lib/transpiler/index.ts';
 import { Tsconfig } from '../lib/tsconfig/index.ts';
 import { CLI } from '../lib/cli/index.ts';
 
@@ -19,40 +18,38 @@ export const buildCommand = CLI.createCommand(
         }
     },
     async o => {
-        const tsconfig = await Tsconfig.load(resolve(o.flags.config ?? 'tsconfig.json'));
-
-        const cwd = dirname(tsconfig.path);
-        const outDir = resolve(cwd, tsconfig.json?.compilerOptions?.outDir ?? '.') + sep;
-        const rootDir = resolve(cwd, tsconfig.json?.compilerOptions?.rootDir ?? '.') + sep;
+        const tsconfig = Tsconfig.load(resolve(o.flags.config ?? 'tsconfig.json'));
+        const tsconfigDir = dirname(tsconfig.path);
         const globIterator = glob(
             [
                 join(
-                    tsconfig.json?.compilerOptions?.rootDir ?? '.',
+                    tsconfig.options.rootDir ?? tsconfigDir,
                     '**', '*.{ts,cts,mts,tsx,ctsx,mtsx}'
                 ),
-                ...(tsconfig.json?.include ?? []).map(x => resolve(x))
+                ...tsconfig.include
             ],
             {
-                cwd,
-                exclude: tsconfig.json?.exclude,
+                cwd: tsconfigDir,
+                exclude: tsconfig.exclude,
                 withFileTypes: true
             }
         );
 
-        const swc = new SWC(tsconfig, [ new ImportExtensionPlugin(tsconfig) ]);
+        const transpiler = new Transpiler(tsconfig, [
+            new PathAliasPlugin(tsconfig, true)
+        ]);
+
         for await (const file of globIterator) {
             if (!file.isFile()) continue;
 
-            const source = new SourceFile(resolve(file.parentPath, file.name));
-            const srcPath = source.toTsExt().path;
-            const outPath = source.toJsExt().path.replace(rootDir, outDir);
-            const { code, map } = await swc.transform(srcPath, outPath);
+            const path = resolve(file.parentPath, file.name);
+            const resp = await transpiler.transpile(path);
             
-            await mkdir(dirname(outPath), { recursive: true });
-            await writeFile(outPath, code);
+            await mkdir(dirname(resp.path), { recursive: true });
+            await writeFile(resp.path, resp.code);
 
-            if (typeof map === 'string') {
-                await writeFile(outPath + '.map', map);
+            if (typeof resp.map === 'string') {
+                await writeFile(resp.path + '.map', resp.map);
             }
         }
     }

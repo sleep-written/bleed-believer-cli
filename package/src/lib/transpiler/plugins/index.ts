@@ -1,0 +1,1 @@
+export * from './path-alias/index.ts';

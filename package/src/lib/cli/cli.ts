@@ -42,8 +42,13 @@ export class CLI {
                 await callback(output, Array.from(this.#commands));
                 return;
 
-            } catch (err) {
-                if (err instanceof ArgvParserError) {
+            } catch (err: any) {
+                if (
+                    err instanceof ArgvParserError ||
+                    typeof err.code === 'string' && (
+                        (err.code as string).startsWith('ERR_PARSE_ARGS_')
+                    )
+                ) {
                     continue;
                 } else {
                     throw err;

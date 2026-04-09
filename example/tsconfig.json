@@ -4,18 +4,19 @@
         "module": "node20",
         "moduleResolution": "node16",
         
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
         "strict": true,
         "noEmit": true,
-        "sourceMap": true,
-        "resolveJsonModule": true,
-        "verbatimModuleSyntax": true,
-        "allowImportingTsExtensions": true,
 
-        "outDir": "./dist",
         "rootDir": "./src",
+        "outDir": "./dist",
         "paths": {
             "@lib/*": [ "./src/lib-old/*", "./src/lib/*" ]
-        }
+        },
+        "types": ["node"]
     },
     "exclude": [
         "**/*.test.ts"

@@ -1,22 +1,47 @@
-import type { LoadHook, ResolveHook } from 'node:module';
+import type { LoadHook, LoadFnOutput } from 'node:module';
 
+import { Transpiler, PathAliasPlugin } from './lib/transpiler/index.ts';
+import { fileURLToPath } from 'node:url';
 import { Tsconfig } from './lib/tsconfig/index.ts';
-import { LoadCustomHook } from './lib/load-custom-hook/index.ts';
-import { ResolveCustomHook } from './lib/resolve-custom-hook/index.ts';
+import { resolve } from 'node:path';
 
-const tsconfigPath = (
+const tsconfigPath = resolve(
     process.env['BLEED-BELIEVER-CLI-TSCONFIG'] ??
     'tsconfig.json'
 );
 
-const tsconfig = await Tsconfig.load(tsconfigPath);
-const loadHook = new LoadCustomHook(tsconfig);
-const resolveHook = new ResolveCustomHook(tsconfig);
+const tsconfig = Tsconfig.load(tsconfigPath);
+const transpiler = new Transpiler(tsconfig, [
+    new PathAliasPlugin(tsconfig, false)
+]);
 
-export const load: LoadHook = (url, context, defaultLoad) => {
-    return loadHook.load(url, context, defaultLoad);
-}
+const cache = new Map<string, LoadFnOutput>();
+export const load: LoadHook = async (url, context, defaultLoad) => {
+    if (cache.has(url)) {
+        return cache.get(url)!;
+    }
 
-export const resolve: ResolveHook = (specifier, context, defaultResolve) => {
-    return resolveHook.resolve(specifier, context, defaultResolve);
+    const path = url.startsWith('file://')
+    ?   fileURLToPath(url)
+    :   url;
+
+    if (/\.(?:m|c)?tsx?$/.test(url)) {
+        try {
+            const { code } = await transpiler.transpile(path);
+            const out: LoadFnOutput = {
+                shortCircuit: true,
+                format: 'module',
+                source: code
+            };
+
+            cache.set(url, out);
+            return out;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+
+    } else {
+        return defaultLoad(url, context);
+    }
 }
