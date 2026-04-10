@@ -13,11 +13,11 @@ const cli = new CLI()
     .addCommand(helpCommand);
 
 try {
-    console.log(banner);
     await cli.execute();
 
 } catch (err: any) {
     if (err instanceof CommandNotFoundError) {
+        console.log(banner);
         console.log(''.padStart(15, ' '), styleText('red', `Sense of me and time fall away`));
         console.log(''.padStart(16, ' '), styleText('red', `Good to meet you in the fire`));
         console.log(''.padStart(15, ' '), styleText('red', `Sense of me and time fall away`));
