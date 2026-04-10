@@ -1,28 +1,32 @@
 # bleed-believer cli
-## Installation
-Using npm:
-```shell
-npm i --save-dev @bleed-believer/cli
-```
+A `ts-node` replacement with path alias resolution, using TSC under the hood.
 
-## Usage
-To execute typescript files (for example `./src/index.ts`), simply use:
-```shell
-npx bleed start ./src/index.ts -- arg1 arg2 arg3
-```
+## Basic usage
+-   Install the package:
+    ```shell
+    npm i --save-dev @bleed-believer/cli
+    ```
 
-To transpile your project:
-```shell
-npx bleed build
-```
+-   Next, launch your application:
+    ```shell
+    ## Using the shortest executable name:
+    npx bleed start ./src/index.ts
 
-...if you want to specify your custon tsconfig file:
-```shell
-# For execution
-npx bleed start ./src/index.ts --config ./tsconfig.build.json -- arg1 arg2 arg3
-npx bleed start ./src/index.ts -c ./tsconfig.build.json -- arg1 arg2 arg3
+    ## ...or if you want the full executable name:
+    npx @bleed-believer/cli start ./src/index.ts
 
-# For transpile
-npx bleed build --config ./tsconfig.build.json
-npx bleed build -c ./tsconfig.build.json
-```
+    ## ...or in case do you want to execute as a loader:
+    node --import @bleed-believer/cli ./src/index.ts
+    ```
+
+## CLI Commands
+-   `npx bleed start [target]`  
+    Run a TypeScript file using the custom ESM loader.
+    -   `[target]`: The file do you want to execute.
+    -   `--config` _(optional)_: Sets a custom tsconfig JSON file.
+    -   `--watch` _(optional)_: Execute as watch mode.
+    -   `--` _(optional)_: Pass arguments to the typescript file.
+
+-   `npx bleed build`  
+    Transpile all files to JavaScript.
+    -   `--config` _(optional)_: Sets a custom tsconfig JSON file.

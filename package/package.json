@@ -1,6 +1,6 @@
 {
   "name": "@bleed-believer/cli",
-  "version": "0.0.5-alpha.0",
+  "version": "0.0.6-alpha.0",
   "description": "A ts-node replacement with path alias resolution and SWC under the hood",
   "type": "module",
   "module": "./dist/index.js",
@@ -17,14 +17,17 @@
     }
   },
   "bin": {
-    "@bleed-believer/path-alias": "./dist/cli.js",
-    "bleed": "./dist/cli.js"
+    "bleed": "dist/cli.js",
+    "path-alias": "dist/cli.js"
   },
   "scripts": {
     "test": "node --test",
-    "test:only": "node --test-only",
     "check": "tsc --noEmit",
-    "build": "node ./src/cli.ts build -c tsconfig.build.json"
+    "clean": "rm -rf ./dist",
+    "build": "node ./src/cli.ts build -c tsconfig.build.json",
+    "prepare": "node --run clean && node --run build",
+    "prepack": "cp ../README.md .",
+    "postpack": "rm ./README.md"
   },
   "repository": {
     "type": "git",
