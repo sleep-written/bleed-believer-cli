@@ -44,7 +44,7 @@ console.log(
     'value:',
     styleText(
         'yellow',
-        await import('@lib/sum.js')
+        await import('@lib/sum.ts')
             .then(x => x.sum(2, 2))
             .then(x => x.toString())
     )
@@ -64,7 +64,7 @@ console.log(
     'value:',
     styleText(
         'yellow',
-        await import('./lib/sum.js')
+        await import('./lib/sum.ts')
             .then(x => x.sum(4, 4))
             .then(x => x.toString())
     )
