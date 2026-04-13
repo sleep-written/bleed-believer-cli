@@ -1,6 +1,6 @@
 import type { LoadHook, LoadFnOutput } from 'node:module';
 
-import { resolve, basename } from 'node:path';
+import { resolve, basename, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { Transpiler, PathAliasPlugin } from './lib/transpiler/index.ts';
@@ -16,6 +16,7 @@ const transpiler = new Transpiler(tsconfig, [
     new PathAliasPlugin(tsconfig, false)
 ]);
 
+const cwd = dirname(tsconfig.path);
 const cache = new Map<string, LoadFnOutput>();
 export const load: LoadHook = async (url, context, defaultLoad) => {
     if (cache.has(url)) {
@@ -32,8 +33,8 @@ export const load: LoadHook = async (url, context, defaultLoad) => {
             let source = code;
             if (map) {
                 const mapObj = JSON.parse(map);
-                mapObj.sources = [ basename(path) ];
-                mapObj.sourceRoot = '';
+                mapObj.sources = [ relative(cwd, path) ];
+                mapObj.sourceRoot = cwd;
                 const base64Map = Buffer
                     .from(JSON.stringify(mapObj))
                     .toString('base64');
