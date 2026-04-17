@@ -69,19 +69,19 @@ export class Transpiler {
     }
 
     async transpile(path: string): Promise<TranspilerOutput> {
-        const source = await this.#injected.readFile(path, 'utf-8');
-        const module = this.#injected.getImpliedNodeFormatForFile(
+        const moduleKind = this.#injected.getImpliedNodeFormatForFile(
             path, undefined, sys,
             this.#tsconfig.options
-        );
+        ) ?? this.#tsconfig.options.module;
 
+        const source = await this.#injected.readFile(path, 'utf-8');
         const { outputText, sourceMapText, diagnostics } = transpileModule(source, {
             compilerOptions: {
                 ...this.#tsconfig.options,
-                moduleResolution: module === ModuleKind.ESNext
+                moduleResolution: moduleKind === ModuleKind.ESNext
                 ?   ModuleResolutionKind.Bundler
                 :   this.#tsconfig.options.moduleResolution,
-                module
+                module: moduleKind
             },
             transformers: {
                 before: [ this.#transformer.bind(this)  ]
